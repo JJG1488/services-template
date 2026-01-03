@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { LayoutWrapper } from "@/components/LayoutWrapper";
 import { getStoreConfig } from "@/lib/store";
 import { getThemeById, generateThemeCSS } from "@/lib/themes";
 import { getStoreSettingsFromDB } from "@/lib/settings";
@@ -46,9 +45,9 @@ export default async function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <Header settings={settings} storeName={store.name} />
-        <main className="min-h-screen">{children}</main>
-        <Footer settings={settings} storeName={store.name} />
+        <LayoutWrapper settings={settings} storeName={store.name}>
+          {children}
+        </LayoutWrapper>
       </body>
     </html>
   );
