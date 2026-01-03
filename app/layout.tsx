@@ -29,10 +29,10 @@ export default async function RootLayout({
   const theme = getThemeById(settings.themePreset);
   const themeCSS = generateThemeCSS(theme);
 
-  // Override brand color with user's selected color from wizard
-  // This ensures the color picker selection takes precedence over theme presets
-  const brandColorOverride = store.primaryColor
-    ? `:root { --brand-color: ${store.primaryColor}; --brand-color-10: ${store.primaryColor}1a; }`
+  // Override brand color with admin-configurable setting
+  // Falls back to wizard-selected color if not set in admin panel
+  const brandColorOverride = settings.brandColor
+    ? `:root { --brand-color: ${settings.brandColor}; --brand-color-10: ${settings.brandColor}1a; --brand-color-20: ${settings.brandColor}33; }`
     : "";
 
   return (
