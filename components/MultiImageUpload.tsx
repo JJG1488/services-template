@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Upload, X, Loader2, GripVertical, Plus, ImageIcon } from "lucide-react";
 
-interface PortfolioImage {
+export interface PortfolioImage {
   url: string;
   alt?: string;
   caption?: string;
