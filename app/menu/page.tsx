@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { MenuDisplay } from "@/components/MenuDisplay";
 import type { MenuCategory, MenuPdf } from "@/types/menu";
 
@@ -34,9 +32,7 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-
+    <div className="bg-gray-50">
       <main className="max-w-4xl mx-auto px-4 py-12">
         {/* Hero */}
         <div className="text-center mb-12">
@@ -61,8 +57,6 @@ export default function MenuPage() {
           <MenuDisplay categories={menu.categories} pdfs={menu.pdfs} />
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }

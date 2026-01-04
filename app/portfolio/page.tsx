@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { PortfolioGrid } from "@/components/PortfolioGrid";
 import { PortfolioFilterBar } from "@/components/PortfolioFilterBar";
 import type { PortfolioItem } from "@/types/portfolio";
@@ -64,9 +62,7 @@ export default function PortfolioPage() {
   const regularItems = items.filter((item) => !item.is_featured);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-
+    <div className="bg-gray-50">
       <main className="max-w-6xl mx-auto px-4 py-12">
         {/* Hero */}
         <div className="text-center mb-12">
@@ -128,8 +124,6 @@ export default function PortfolioPage() {
           </>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }
