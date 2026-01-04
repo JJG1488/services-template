@@ -14,6 +14,11 @@ export interface Theme {
     textPrimary: string;
     textSecondary: string;
   };
+  preview: {
+    primary: string;
+    accent: string;
+    background: string;
+  };
   isPremium: boolean;
 }
 
@@ -31,6 +36,11 @@ export const themes: Theme[] = [
       textPrimary: "#111827",
       textSecondary: "#4b5563",
     },
+    preview: {
+      primary: "#FFD700",
+      accent: "#e6c200",
+      background: "#ffffff",
+    },
     isPremium: false,
   },
   {
@@ -45,6 +55,11 @@ export const themes: Theme[] = [
       bgDark: "#0f172a",
       textPrimary: "#0f172a",
       textSecondary: "#475569",
+    },
+    preview: {
+      primary: "#3b82f6",
+      accent: "#2563eb",
+      background: "#f8fafc",
     },
     isPremium: false,
   },
@@ -61,6 +76,11 @@ export const themes: Theme[] = [
       textPrimary: "#064e3b",
       textSecondary: "#047857",
     },
+    preview: {
+      primary: "#10b981",
+      accent: "#059669",
+      background: "#f0fdf4",
+    },
     isPremium: true,
   },
   {
@@ -75,6 +95,11 @@ export const themes: Theme[] = [
       bgDark: "#7c2d12",
       textPrimary: "#1c1917",
       textSecondary: "#57534e",
+    },
+    preview: {
+      primary: "#f97316",
+      accent: "#ea580c",
+      background: "#fff7ed",
     },
     isPremium: true,
   },
@@ -91,6 +116,11 @@ export const themes: Theme[] = [
       textPrimary: "#1e1b4b",
       textSecondary: "#4338ca",
     },
+    preview: {
+      primary: "#8b5cf6",
+      accent: "#7c3aed",
+      background: "#faf5ff",
+    },
     isPremium: true,
   },
   {
@@ -106,9 +136,17 @@ export const themes: Theme[] = [
       textPrimary: "#0f172a",
       textSecondary: "#0f766e",
     },
+    preview: {
+      primary: "#14b8a6",
+      accent: "#0d9488",
+      background: "#f0fdfa",
+    },
     isPremium: true,
   },
 ];
+
+// Export all themes for the settings page
+export const allThemes = themes;
 
 export function getThemeById(themeId: string): Theme {
   return themes.find((t) => t.id === themeId) || themes[0];

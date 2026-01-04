@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Plus, X, GripVertical, Star } from "lucide-react";
+import { Save, Plus, X, GripVertical, Star, Lock, Check, Sparkles, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { allThemes } from "@/lib/themes";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import type {
   ProcessStep,
   StatItem,
   TrustBadge,
   SpecialtyItem,
-  AdditionalService,
   CommitmentBadge,
   Testimonial,
 } from "@/lib/settings";
@@ -32,7 +33,6 @@ interface Settings {
   showFaq: boolean;
   showWhyChooseUs: boolean;
   showSpecialties: boolean;
-  showAdditionalServices: boolean;
   showBadges: boolean;
   showMapEmbed: boolean;
 
@@ -72,10 +72,6 @@ interface Settings {
   specialtiesTitle: string;
   specialties: SpecialtyItem[];
 
-  // Additional Services
-  additionalServicesTitle: string;
-  additionalServices: AdditionalService[];
-
   // Badges
   badgesTitle: string;
   badgesSubtitle: string;
@@ -110,7 +106,6 @@ const defaultSettings: Settings = {
   showFaq: true,
   showWhyChooseUs: true,
   showSpecialties: false,
-  showAdditionalServices: false,
   showBadges: true,
   showMapEmbed: false,
   process: [
@@ -149,8 +144,6 @@ const defaultSettings: Settings = {
   emergencyBannerEnabled: false,
   specialtiesTitle: "Our Specialties",
   specialties: [],
-  additionalServicesTitle: "Additional Services",
-  additionalServices: [],
   badgesTitle: "Our Commitment to Excellence",
   badgesSubtitle: "Why customers choose us for their service needs",
   badges: [
@@ -188,8 +181,29 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("general");
   const [newArea, setNewArea] = useState("");
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    hero: true,
+    sections: false,
+    process: false,
+    whychooseus: false,
+    specialties: true,
+    badges: false,
+    testimonials: false,
+    stats: false,
+    footer: false,
+  });
+  const flags = useFeatureFlags();
+
+  function toggleSection(section: string) {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  }
 
   useEffect(() => {
     async function fetchSettings() {
@@ -197,13 +211,15 @@ export default function SettingsPage() {
         const token = localStorage.getItem("admin_token");
         const res = await fetch("/api/admin/settings", {
           headers: { Authorization: "Bearer " + token },
+          cache: "no-store",
         });
         if (res.ok) {
           const data = await res.json();
-          setSettings({ ...defaultSettings, ...data });
+          // API returns wrapped response: { settings: {...} }
+          setSettings({ ...defaultSettings, ...data.settings });
         }
-      } catch (error) {
-        console.error("Error fetching settings:", error);
+      } catch (err) {
+        console.error("Error fetching settings:", err);
       } finally {
         setLoading(false);
       }
@@ -213,6 +229,7 @@ export default function SettingsPage() {
 
   async function handleSave() {
     setSaving(true);
+    setError("");
     try {
       const token = localStorage.getItem("admin_token");
       const res = await fetch("/api/admin/settings", {
@@ -223,9 +240,17 @@ export default function SettingsPage() {
         },
         body: JSON.stringify(settings),
       });
-      if (!res.ok) throw new Error("Failed to save");
-    } catch (error) {
-      console.error("Error saving settings:", error);
+
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        const data = await res.json();
+        setError(data.error || "Failed to save settings");
+      }
+    } catch (err) {
+      console.error("Error saving settings:", err);
+      setError("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -295,29 +320,6 @@ export default function SettingsPage() {
     }));
   }
 
-  function updateAdditionalService(index: number, field: keyof AdditionalService, value: string) {
-    setSettings((prev) => ({
-      ...prev,
-      additionalServices: prev.additionalServices.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      ),
-    }));
-  }
-
-  function addAdditionalService() {
-    setSettings((prev) => ({
-      ...prev,
-      additionalServices: [...prev.additionalServices, { title: "", description: "", icon: "🔧" }],
-    }));
-  }
-
-  function removeAdditionalService(index: number) {
-    setSettings((prev) => ({
-      ...prev,
-      additionalServices: prev.additionalServices.filter((_, i) => i !== index),
-    }));
-  }
-
   function updateBadge(index: number, field: keyof CommitmentBadge, value: string) {
     setSettings((prev) => ({
       ...prev,
@@ -381,29 +383,31 @@ export default function SettingsPage() {
   const tabs = [
     { id: "general", label: "General" },
     { id: "appearance", label: "Appearance" },
-    { id: "hero", label: "Hero" },
-    { id: "contact", label: "Contact" },
-    { id: "sections", label: "Sections" },
-    { id: "process", label: "Process" },
-    { id: "whychooseus", label: "Why Choose Us" },
-    { id: "specialties", label: "Specialties" },
-    { id: "badges", label: "Badges" },
-    { id: "testimonials", label: "Testimonials" },
-    { id: "footer", label: "Footer" },
+    { id: "homepage", label: "Homepage" },
+    { id: "services", label: "Services & Trust" },
+    { id: "contact", label: "Contact & Footer" },
   ];
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">Settings</h1>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 bg-brand text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-brand-dark disabled:opacity-50 transition-colors"
-        >
-          <Save className="w-5 h-5" />
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
+        <div className="flex items-center gap-4">
+          {saved && (
+            <span className="text-green-600 text-sm font-medium">Settings saved!</span>
+          )}
+          {error && (
+            <span className="text-red-600 text-sm font-medium">{error}</span>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 bg-brand text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-brand-dark disabled:opacity-50 transition-colors"
+          >
+            <Save className="w-5 h-5" />
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -511,12 +515,113 @@ export default function SettingsPage() {
 
       {/* Appearance Tab */}
       {activeTab === "appearance" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Brand Color
-            </label>
-            <div className="flex items-center gap-4">
+        <div className="space-y-6">
+          {/* Theme Selection Grid */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="font-semibold text-gray-900">Site Theme</h3>
+                <p className="text-sm text-gray-500">Choose a color scheme for your site</p>
+              </div>
+              {!flags.premiumThemesEnabled && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                  <Lock className="w-3 h-3" />
+                  Pro Feature
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {allThemes.map((theme) => {
+                const isSelected = settings.themePreset === theme.id;
+                const isLocked = theme.isPremium && !flags.premiumThemesEnabled;
+
+                return (
+                  <button
+                    key={theme.id}
+                    onClick={() => {
+                      if (!isLocked) {
+                        setSettings({ ...settings, themePreset: theme.id });
+                      }
+                    }}
+                    disabled={isLocked}
+                    className={`relative p-4 rounded-xl border-2 transition-all text-left ${
+                      isSelected
+                        ? "border-brand bg-brand/5"
+                        : isLocked
+                        ? "border-gray-200 opacity-60 cursor-not-allowed"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {/* Theme preview swatches */}
+                    <div className="flex gap-1.5 mb-3">
+                      <div
+                        className="w-8 h-8 rounded-lg shadow-sm"
+                        style={{ backgroundColor: theme.preview.primary }}
+                      />
+                      <div
+                        className="w-8 h-8 rounded-lg shadow-sm"
+                        style={{ backgroundColor: theme.preview.accent }}
+                      />
+                      <div
+                        className="w-8 h-8 rounded-lg border border-gray-200"
+                        style={{ backgroundColor: theme.preview.background }}
+                      />
+                    </div>
+
+                    {/* Theme info */}
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-gray-900">{theme.name}</span>
+                      {isLocked && <Lock className="w-3.5 h-3.5 text-gray-400" />}
+                      {isSelected && <Check className="w-4 h-4 text-brand" />}
+                    </div>
+                    <p className="text-xs text-gray-500">{theme.description}</p>
+
+                    {/* Premium badge (shown when unlocked) */}
+                    {theme.isPremium && !isLocked && (
+                      <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium rounded-full">
+                        <Sparkles className="w-3 h-3" />
+                        Pro
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Upgrade prompt for non-Pro users */}
+            {!flags.premiumThemesEnabled && (
+              <div className="mt-6 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-900">Upgrade to Pro for Premium Themes</p>
+                    <p className="text-sm text-amber-700 mt-1">
+                      Unlock 4 additional designer themes to make your site stand out.
+                    </p>
+                    <a
+                      href="https://gosovereign.io/wizard/preview"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Upgrade Now
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Brand Color Override Section */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-900">Custom Brand Color</h3>
+              <p className="text-sm text-gray-500">Override the theme&apos;s primary color with your own</p>
+            </div>
+
+            <div className="flex items-center gap-4 mb-4">
               <input
                 type="color"
                 value={settings.brandColor}
@@ -531,944 +636,1003 @@ export default function SettingsPage() {
                 className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand font-mono"
               />
             </div>
-            <p className="text-sm text-gray-500 mt-2">
-              This color is used for buttons, accents, and highlights throughout your site.
+
+            {/* Quick Presets */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Quick Presets
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { color: "#FFD700", name: "Gold" },
+                  { color: "#3B82F6", name: "Blue" },
+                  { color: "#10B981", name: "Green" },
+                  { color: "#EF4444", name: "Red" },
+                  { color: "#8B5CF6", name: "Purple" },
+                  { color: "#F97316", name: "Orange" },
+                  { color: "#EC4899", name: "Pink" },
+                  { color: "#14B8A6", name: "Teal" },
+                ].map((preset) => (
+                  <button
+                    key={preset.color}
+                    type="button"
+                    onClick={() => setSettings((prev) => ({ ...prev, brandColor: preset.color }))}
+                    className={"flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors " + (
+                      settings.brandColor.toLowerCase() === preset.color.toLowerCase()
+                        ? "border-gray-900 bg-gray-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full"
+                      style={{ backgroundColor: preset.color }}
+                    />
+                    <span className="text-sm">{preset.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Preview Note */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-1">Theme Preview</h4>
+            <p className="text-sm text-blue-700">
+              After saving, the selected theme will be applied to your site.
+              Visit your site to see the changes in action.
             </p>
           </div>
-
-          {/* Preview */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Preview
-            </label>
-            <div className="flex flex-wrap items-center gap-4 p-4 bg-gray-50 rounded-lg">
-              <div
-                className="w-24 h-12 rounded-lg shadow-sm"
-                style={{ backgroundColor: settings.brandColor }}
-              />
-              <button
-                type="button"
-                className="px-6 py-2.5 rounded-xl font-semibold shadow-sm transition-colors"
-                style={{ backgroundColor: settings.brandColor, color: '#111' }}
-              >
-                Sample Button
-              </button>
-              <span
-                className="px-3 py-1 rounded-full text-sm font-medium"
-                style={{ backgroundColor: settings.brandColor + '20', color: settings.brandColor }}
-              >
-                Sample Badge
-              </span>
-            </div>
-          </div>
-
-          {/* Quick Presets */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Quick Presets
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { color: "#FFD700", name: "Gold" },
-                { color: "#3B82F6", name: "Blue" },
-                { color: "#10B981", name: "Green" },
-                { color: "#EF4444", name: "Red" },
-                { color: "#8B5CF6", name: "Purple" },
-                { color: "#F97316", name: "Orange" },
-                { color: "#EC4899", name: "Pink" },
-                { color: "#14B8A6", name: "Teal" },
-              ].map((preset) => (
-                <button
-                  key={preset.color}
-                  type="button"
-                  onClick={() => setSettings((prev) => ({ ...prev, brandColor: preset.color }))}
-                  className={"flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors " + (
-                    settings.brandColor.toLowerCase() === preset.color.toLowerCase()
-                      ? "border-gray-900 bg-gray-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  )}
-                >
-                  <div
-                    className="w-5 h-5 rounded-full"
-                    style={{ backgroundColor: preset.color }}
-                  />
-                  <span className="text-sm">{preset.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 
-      {/* Hero Tab */}
-      {activeTab === "hero" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Badge Text (above heading)
-              </label>
-              <input
-                type="text"
-                value={settings.heroBadgeText}
-                onChange={(e) => setSettings((prev) => ({ ...prev, heroBadgeText: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Trusted Since 2010"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hero Style
-              </label>
-              <select
-                value={settings.heroStyle}
-                onChange={(e) => setSettings((prev) => ({ ...prev, heroStyle: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              >
-                <option value="gradient">Gradient Background</option>
-                <option value="image">Background Image</option>
-                <option value="video">Background Video</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Main Heading
-              </label>
-              <input
-                type="text"
-                value={settings.heroHeading}
-                onChange={(e) => setSettings((prev) => ({ ...prev, heroHeading: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Professional Services"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Heading Accent (colored)
-              </label>
-              <input
-                type="text"
-                value={settings.heroHeadingAccent}
-                onChange={(e) => setSettings((prev) => ({ ...prev, heroHeadingAccent: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="You Can Trust"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Subheading / Secondary Text
-            </label>
-            <input
-              type="text"
-              value={settings.heroSubheading}
-              onChange={(e) => setSettings((prev) => ({ ...prev, heroSubheading: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              placeholder="Quality workmanship, reliable service, and complete customer satisfaction guaranteed."
-            />
-          </div>
-
-          {settings.heroStyle === "image" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hero Image URL
-              </label>
-              <input
-                type="url"
-                value={settings.heroImageUrl}
-                onChange={(e) => setSettings((prev) => ({ ...prev, heroImageUrl: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="https://example.com/hero-image.jpg"
-              />
-            </div>
-          )}
-
-          {settings.heroStyle === "video" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hero Video URL
-              </label>
-              <input
-                type="url"
-                value={settings.heroVideoUrl}
-                onChange={(e) => setSettings((prev) => ({ ...prev, heroVideoUrl: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="https://example.com/hero-video.mp4"
-              />
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Primary CTA Text
-              </label>
-              <input
-                type="text"
-                value={settings.heroCTAText}
-                onChange={(e) => setSettings((prev) => ({ ...prev, heroCTAText: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Get a Free Quote"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Secondary CTA Text
-              </label>
-              <input
-                type="text"
-                value={settings.heroSecondaryCTAText}
-                onChange={(e) => setSettings((prev) => ({ ...prev, heroSecondaryCTAText: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Our Services"
-              />
-            </div>
-          </div>
-
-          {/* Trust Badges */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Trust Badges (shown below heading)
-              </label>
-              <button
-                type="button"
-                onClick={addTrustBadge}
-                className="flex items-center gap-1 text-sm text-brand hover:text-brand-dark"
-              >
-                <Plus className="w-4 h-4" /> Add Badge
-              </button>
-            </div>
-            <div className="space-y-3">
-              {settings.trustBadges.map((badge, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <select
-                    value={badge.icon}
-                    onChange={(e) => updateTrustBadge(index, "icon", e.target.value)}
-                    className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                  >
-                    {iconOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    value={badge.text}
-                    onChange={(e) => updateTrustBadge(index, "text", e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                    placeholder="Badge text"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeTrustBadge(index)}
-                    className="text-gray-400 hover:text-red-500"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Contact Tab */}
-      {activeTab === "contact" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Contact Mode
-            </label>
-            <select
-              value={settings.contactMode}
-              onChange={(e) => setSettings((prev) => ({ ...prev, contactMode: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+      {/* Homepage Tab - Merged Hero, Sections, Process, Why Choose Us */}
+      {activeTab === "homepage" && (
+        <div className="space-y-4">
+          {/* Hero Section - Collapsible */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection("hero")}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
-              <option value="form">Contact Form</option>
-              <option value="calendly">Calendly Scheduling</option>
-              <option value="phone">Phone Only</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              value={settings.phoneNumber}
-              onChange={(e) => setSettings((prev) => ({ ...prev, phoneNumber: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              placeholder="(555) 123-4567"
-            />
-          </div>
-
-          {settings.contactMode === "calendly" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Calendly URL
-              </label>
-              <input
-                type="url"
-                value={settings.calendlyUrl}
-                onChange={(e) => setSettings((prev) => ({ ...prev, calendlyUrl: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="https://calendly.com/yourbusiness"
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Sections Tab */}
-      {activeTab === "sections" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
-          <p className="text-sm text-gray-500 mb-4">
-            Toggle which sections appear on your homepage
-          </p>
-
-          {[
-            { key: "showProcess", label: "How It Works / Process Steps" },
-            { key: "showWhyChooseUs", label: "Why Choose Us" },
-            { key: "showSpecialties", label: "Specialties / Materials" },
-            { key: "showAdditionalServices", label: "Additional Services" },
-            { key: "showBadges", label: "Commitment Badges" },
-            { key: "showStats", label: "Stats / Counters" },
-            { key: "showTestimonials", label: "Testimonials" },
-            { key: "showTeam", label: "Team Members" },
-            { key: "showFaq", label: "FAQ Section" },
-            { key: "showMapEmbed", label: "Footer Map Embed" },
-          ].map((item) => (
-            <label key={item.key} className="flex items-center gap-3 cursor-pointer py-2">
-              <input
-                type="checkbox"
-                checked={settings[item.key as keyof Settings] as boolean}
-                onChange={(e) =>
-                  setSettings((prev) => ({ ...prev, [item.key]: e.target.checked }))
-                }
-                className="w-5 h-5 text-brand focus:ring-brand rounded"
-              />
-              <span className="text-gray-700">{item.label}</span>
-            </label>
-          ))}
-        </div>
-      )}
-
-      {/* Process Tab */}
-      {activeTab === "process" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Title
-              </label>
-              <input
-                type="text"
-                value={settings.processTitle}
-                onChange={(e) => setSettings((prev) => ({ ...prev, processTitle: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Our Simple Process"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                CTA Button Text
-              </label>
-              <input
-                type="text"
-                value={settings.processCTAText}
-                onChange={(e) => setSettings((prev) => ({ ...prev, processCTAText: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Get Your Free Estimate"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Section Subtitle
-            </label>
-            <input
-              type="text"
-              value={settings.processSubtitle}
-              onChange={(e) => setSettings((prev) => ({ ...prev, processSubtitle: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              placeholder="From consultation to completion, we make it easy"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-4">
-              Process Steps
-            </label>
-            <div className="space-y-4">
-              {settings.process.map((step, index) => (
-                <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                  <GripVertical className="w-5 h-5 text-gray-400 mt-3" />
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
-                        Step {index + 1} Title
-                      </label>
-                      <input
-                        type="text"
-                        value={step.title}
-                        onChange={(e) => updateProcess(index, "title", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
-                        Description
-                      </label>
-                      <input
-                        type="text"
-                        value={step.description}
-                        onChange={(e) => updateProcess(index, "description", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      />
-                    </div>
+              <h3 className="font-semibold text-gray-900">Hero Section</h3>
+              {expandedSections.hero ? (
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.hero && (
+              <div className="p-6 pt-2 border-t border-gray-100 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Badge Text (above heading)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.heroBadgeText}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, heroBadgeText: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Trusted Since 2010"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hero Style
+                    </label>
+                    <select
+                      value={settings.heroStyle}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, heroStyle: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    >
+                      <option value="gradient">Gradient Background</option>
+                      <option value="image">Background Image</option>
+                      <option value="video">Background Video</option>
+                    </select>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Main Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.heroHeading}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, heroHeading: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Professional Services"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Heading Accent (colored)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.heroHeadingAccent}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, heroHeadingAccent: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="You Can Trust"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subheading / Secondary Text
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.heroSubheading}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, heroSubheading: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    placeholder="Quality workmanship, reliable service, and complete customer satisfaction guaranteed."
+                  />
+                </div>
+
+                {settings.heroStyle === "image" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hero Image URL
+                    </label>
+                    <input
+                      type="url"
+                      value={settings.heroImageUrl}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, heroImageUrl: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="https://example.com/hero-image.jpg"
+                    />
+                  </div>
+                )}
+
+                {settings.heroStyle === "video" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hero Video URL
+                    </label>
+                    <input
+                      type="url"
+                      value={settings.heroVideoUrl}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, heroVideoUrl: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="https://example.com/hero-video.mp4"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Primary CTA Text
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.heroCTAText}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, heroCTAText: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Get a Free Quote"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Secondary CTA Text
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.heroSecondaryCTAText}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, heroSecondaryCTAText: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Our Services"
+                    />
+                  </div>
+                </div>
+
+                {/* Trust Badges */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Trust Badges (shown below heading)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={addTrustBadge}
+                      className="flex items-center gap-1 text-sm text-brand hover:text-brand-dark"
+                    >
+                      <Plus className="w-4 h-4" /> Add Badge
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {settings.trustBadges.map((badge, index) => (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <select
+                          value={badge.icon}
+                          onChange={(e) => updateTrustBadge(index, "icon", e.target.value)}
+                          className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                        >
+                          {iconOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          value={badge.text}
+                          onChange={(e) => updateTrustBadge(index, "text", e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                          placeholder="Badge text"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeTrustBadge(index)}
+                          className="text-gray-400 hover:text-red-500"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
 
-      {/* Why Choose Us Tab */}
-      {activeTab === "whychooseus" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Title
-              </label>
-              <input
-                type="text"
-                value={settings.whyChooseUsTitle}
-                onChange={(e) => setSettings((prev) => ({ ...prev, whyChooseUsTitle: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Why Choose Us?"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Main Heading
-              </label>
-              <input
-                type="text"
-                value={settings.whyChooseUsHeading}
-                onChange={(e) => setSettings((prev) => ({ ...prev, whyChooseUsHeading: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Quality You Can Trust"
-              />
-            </div>
+          {/* Section Visibility - Collapsible */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection("sections")}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-900">Section Visibility</h3>
+              {expandedSections.sections ? (
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.sections && (
+              <div className="p-6 pt-2 border-t border-gray-100 space-y-4">
+                <p className="text-sm text-gray-500 mb-4">
+                  Toggle which sections appear on your homepage
+                </p>
+                {[
+                  { key: "showProcess", label: "How It Works / Process Steps" },
+                  { key: "showWhyChooseUs", label: "Why Choose Us" },
+                  { key: "showSpecialties", label: "Specialties / Materials" },
+                  { key: "showBadges", label: "Commitment Badges" },
+                  { key: "showStats", label: "Stats / Counters" },
+                  { key: "showTestimonials", label: "Testimonials" },
+                  { key: "showTeam", label: "Team Members" },
+                  { key: "showFaq", label: "FAQ Section" },
+                  { key: "showMapEmbed", label: "Footer Map Embed" },
+                ].map((item) => (
+                  <label key={item.key} className="flex items-center gap-3 cursor-pointer py-2">
+                    <input
+                      type="checkbox"
+                      checked={settings[item.key as keyof Settings] as boolean}
+                      onChange={(e) =>
+                        setSettings((prev) => ({ ...prev, [item.key]: e.target.checked }))
+                      }
+                      className="w-5 h-5 text-brand focus:ring-brand rounded"
+                    />
+                    <span className="text-gray-700">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              About Text
-            </label>
-            <textarea
-              value={settings.whyChooseUsText}
-              onChange={(e) => setSettings((prev) => ({ ...prev, whyChooseUsText: e.target.value }))}
-              rows={6}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              placeholder="Tell customers why they should choose your business..."
-            />
+          {/* Process Steps - Collapsible */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection("process")}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-900">How It Works</h3>
+              {expandedSections.process ? (
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.process && (
+              <div className="p-6 pt-2 border-t border-gray-100 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Section Title
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.processTitle}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, processTitle: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Our Simple Process"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      CTA Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.processCTAText}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, processCTAText: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Get Your Free Estimate"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Section Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.processSubtitle}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, processSubtitle: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    placeholder="From consultation to completion, we make it easy"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-4">
+                    Process Steps
+                  </label>
+                  <div className="space-y-4">
+                    {settings.process.map((step, index) => (
+                      <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                        <GripVertical className="w-5 h-5 text-gray-400 mt-3" />
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Step {index + 1} Title
+                            </label>
+                            <input
+                              type="text"
+                              value={step.title}
+                              onChange={(e) => updateProcess(index, "title", e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Description
+                            </label>
+                            <input
+                              type="text"
+                              value={step.description}
+                              onChange={(e) => updateProcess(index, "description", e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="border-t pt-6">
-            <label className="flex items-center gap-3 cursor-pointer mb-4">
-              <input
-                type="checkbox"
-                checked={settings.emergencyBannerEnabled}
-                onChange={(e) => setSettings((prev) => ({ ...prev, emergencyBannerEnabled: e.target.checked }))}
-                className="w-5 h-5 text-brand focus:ring-brand rounded"
-              />
-              <span className="text-gray-700 font-medium">Show Emergency Services Banner</span>
-            </label>
+          {/* Why Choose Us - Collapsible */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection("whychooseus")}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-900">Why Choose Us</h3>
+              {expandedSections.whychooseus ? (
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.whychooseus && (
+              <div className="p-6 pt-2 border-t border-gray-100 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Section Title
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.whyChooseUsTitle}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, whyChooseUsTitle: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Why Choose Us?"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Main Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.whyChooseUsHeading}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, whyChooseUsHeading: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Quality You Can Trust"
+                    />
+                  </div>
+                </div>
 
-            {settings.emergencyBannerEnabled && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Banner Text
-                </label>
-                <input
-                  type="text"
-                  value={settings.emergencyBannerText}
-                  onChange={(e) => setSettings((prev) => ({ ...prev, emergencyBannerText: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                  placeholder="Available for Emergency Services!"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    About Text
+                  </label>
+                  <textarea
+                    value={settings.whyChooseUsText}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, whyChooseUsText: e.target.value }))}
+                    rows={6}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    placeholder="Tell customers why they should choose your business..."
+                  />
+                </div>
+
+                <div className="border-t pt-6">
+                  <label className="flex items-center gap-3 cursor-pointer mb-4">
+                    <input
+                      type="checkbox"
+                      checked={settings.emergencyBannerEnabled}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, emergencyBannerEnabled: e.target.checked }))}
+                      className="w-5 h-5 text-brand focus:ring-brand rounded"
+                    />
+                    <span className="text-gray-700 font-medium">Show Emergency Services Banner</span>
+                  </label>
+
+                  {settings.emergencyBannerEnabled && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Banner Text
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.emergencyBannerText}
+                        onChange={(e) => setSettings((prev) => ({ ...prev, emergencyBannerText: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                        placeholder="Available for Emergency Services!"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Specialties Tab */}
-      {activeTab === "specialties" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Section Title
-            </label>
-            <input
-              type="text"
-              value={settings.specialtiesTitle}
-              onChange={(e) => setSettings((prev) => ({ ...prev, specialtiesTitle: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              placeholder="Our Specialties"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Specialty Items
-              </label>
-              <button
-                type="button"
-                onClick={addSpecialty}
-                className="flex items-center gap-1 text-sm text-brand hover:text-brand-dark"
-              >
-                <Plus className="w-4 h-4" /> Add Specialty
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {settings.specialties.map((item, index) => (
-                <div key={item.id || index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-500">Item {index + 1}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSpecialty(index)}
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={item.name}
-                      onChange={(e) => updateSpecialty(index, "name", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      placeholder="Specialty name"
-                    />
-                    <textarea
-                      value={item.description}
-                      onChange={(e) => updateSpecialty(index, "description", e.target.value)}
-                      rows={2}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      placeholder="Description"
-                    />
-                  </div>
-                </div>
-              ))}
-
-              {settings.specialties.length === 0 && (
-                <p className="text-gray-500 text-sm text-center py-8">
-                  No specialties added yet. Click &quot;Add Specialty&quot; to add one.
-                </p>
+      {/* Services & Trust Tab - Merged Specialties, Badges, Testimonials */}
+      {activeTab === "services" && (
+        <div className="space-y-4">
+          {/* Specialties & Services - Collapsible */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection("specialties")}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-900">Specialties & Services</h3>
+              {expandedSections.specialties ? (
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
               )}
-            </div>
-          </div>
-
-          {/* Additional Services */}
-          <div className="border-t pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Additional Services (with icons/emojis)
-              </label>
-              <button
-                type="button"
-                onClick={addAdditionalService}
-                className="flex items-center gap-1 text-sm text-brand hover:text-brand-dark"
-              >
-                <Plus className="w-4 h-4" /> Add Service
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {settings.additionalServices.map((item, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-500">Service {index + 1}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeAdditionalService(index)}
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input
-                      type="text"
-                      value={item.icon}
-                      onChange={(e) => updateAdditionalService(index, "icon", e.target.value)}
-                      className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm text-center text-2xl"
-                      placeholder="🔧"
-                    />
-                    <input
-                      type="text"
-                      value={item.title}
-                      onChange={(e) => updateAdditionalService(index, "title", e.target.value)}
-                      className="md:col-span-3 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      placeholder="Service title"
-                    />
-                  </div>
-                  <textarea
-                    value={item.description}
-                    onChange={(e) => updateAdditionalService(index, "description", e.target.value)}
-                    rows={2}
-                    className="w-full mt-3 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                    placeholder="Description"
+            </button>
+            {expandedSections.specialties && (
+              <div className="p-6 pt-2 border-t border-gray-100 space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Section Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.specialtiesTitle}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, specialtiesTitle: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    placeholder="Our Specialties"
                   />
                 </div>
-              ))}
 
-              {settings.additionalServices.length === 0 && (
-                <p className="text-gray-500 text-sm text-center py-4">
-                  No additional services added yet.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Badges Tab */}
-      {activeTab === "badges" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Title
-              </label>
-              <input
-                type="text"
-                value={settings.badgesTitle}
-                onChange={(e) => setSettings((prev) => ({ ...prev, badgesTitle: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Our Commitment to Excellence"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Subtitle
-              </label>
-              <input
-                type="text"
-                value={settings.badgesSubtitle}
-                onChange={(e) => setSettings((prev) => ({ ...prev, badgesSubtitle: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Why customers choose us"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-4">
-              Commitment Badges
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {settings.badges.map((badge, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Icon</label>
-                      <select
-                        value={badge.icon}
-                        onChange={(e) => updateBadge(index, "icon", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      >
-                        {iconOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Color</label>
-                      <input
-                        type="color"
-                        value={badge.color}
-                        onChange={(e) => updateBadge(index, "color", e.target.value)}
-                        className="w-full h-10 border border-gray-200 rounded-lg cursor-pointer"
-                      />
-                    </div>
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Specialty Items
+                    </label>
+                    <button
+                      type="button"
+                      onClick={addSpecialty}
+                      className="flex items-center gap-1 text-sm text-brand hover:text-brand-dark"
+                    >
+                      <Plus className="w-4 h-4" /> Add Specialty
+                    </button>
                   </div>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={badge.title}
-                      onChange={(e) => updateBadge(index, "title", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      placeholder="Badge title"
-                    />
-                    <input
-                      type="text"
-                      value={badge.description}
-                      onChange={(e) => updateBadge(index, "description", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      placeholder="Badge description"
-                    />
+
+                  <div className="space-y-4">
+                    {settings.specialties.map((item, index) => (
+                      <div key={item.id || index} className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-start justify-between mb-3">
+                          <span className="text-sm font-medium text-gray-500">Item {index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeSpecialty(index)}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => updateSpecialty(index, "name", e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            placeholder="Specialty name"
+                          />
+                          <textarea
+                            value={item.description}
+                            onChange={(e) => updateSpecialty(index, "description", e.target.value)}
+                            rows={2}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            placeholder="Description"
+                          />
+                        </div>
+                      </div>
+                    ))}
+
+                    {settings.specialties.length === 0 && (
+                      <p className="text-gray-500 text-sm text-center py-8">
+                        No specialties added yet. Click &quot;Add Specialty&quot; to add one.
+                      </p>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
+
+                {/* Services Link */}
+                <div className="border-t pt-6">
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-1">Manage Your Services</h4>
+                    <p className="text-sm text-blue-700 mb-3">
+                      Add, edit, and organize your services with full details including pricing, features, and images.
+                    </p>
+                    <a
+                      href="/admin/services"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Go to Services
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Stats Section */}
-          <div className="border-t pt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-4">
-              Statistics (shown in dark bar below badges)
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {settings.stats.map((stat, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
-                      Value
+          {/* Badges & Stats - Collapsible */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection("badges")}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-900">Trust Badges & Stats</h3>
+              {expandedSections.badges ? (
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.badges && (
+              <div className="p-6 pt-2 border-t border-gray-100 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Section Title
                     </label>
                     <input
                       type="text"
-                      value={stat.value}
-                      onChange={(e) => updateStat(index, "value", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      placeholder="10+"
+                      value={settings.badgesTitle}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, badgesTitle: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Our Commitment to Excellence"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
-                      Label
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Section Subtitle
                     </label>
                     <input
                       type="text"
-                      value={stat.label}
-                      onChange={(e) => updateStat(index, "label", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      placeholder="Years Experience"
+                      value={settings.badgesSubtitle}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, badgesSubtitle: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Why customers choose us"
                     />
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Testimonials Tab */}
-      {activeTab === "testimonials" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Title
-              </label>
-              <input
-                type="text"
-                value={settings.testimonialsTitle}
-                onChange={(e) => setSettings((prev) => ({ ...prev, testimonialsTitle: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="What Our Customers Say"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Subtitle
-              </label>
-              <input
-                type="text"
-                value={settings.testimonialsSubtitle}
-                onChange={(e) => setSettings((prev) => ({ ...prev, testimonialsSubtitle: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Real reviews from satisfied customers"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Overall Rating
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="5"
-                step="0.1"
-                value={settings.overallRating}
-                onChange={(e) => setSettings((prev) => ({ ...prev, overallRating: parseFloat(e.target.value) || 5 }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Total Review Count
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={settings.reviewCount}
-                onChange={(e) => setSettings((prev) => ({ ...prev, reviewCount: parseInt(e.target.value) || 0 }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Google Reviews Link
-              </label>
-              <input
-                type="url"
-                value={settings.googleReviewsUrl}
-                onChange={(e) => setSettings((prev) => ({ ...prev, googleReviewsUrl: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="https://g.page/..."
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Testimonials
-              </label>
-              <button
-                type="button"
-                onClick={addTestimonial}
-                className="flex items-center gap-1 text-sm text-brand hover:text-brand-dark"
-              >
-                <Plus className="w-4 h-4" /> Add Testimonial
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {settings.testimonials.map((item, index) => (
-                <div key={item.id || index} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-500">Review {index + 1}</span>
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => updateTestimonial(index, "rating", star)}
-                            className="focus:outline-none"
-                          >
-                            <Star
-                              className={`w-5 h-5 ${
-                                star <= item.rating
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-4">
+                    Commitment Badges
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {settings.badges.map((badge, index) => (
+                      <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Icon</label>
+                            <select
+                              value={badge.icon}
+                              onChange={(e) => updateBadge(index, "icon", e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            >
+                              {iconOptions.map((opt) => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Color</label>
+                            <input
+                              type="color"
+                              value={badge.color}
+                              onChange={(e) => updateBadge(index, "color", e.target.value)}
+                              className="w-full h-10 border border-gray-200 rounded-lg cursor-pointer"
                             />
-                          </button>
-                        ))}
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            value={badge.title}
+                            onChange={(e) => updateBadge(index, "title", e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            placeholder="Badge title"
+                          />
+                          <input
+                            type="text"
+                            value={badge.description}
+                            onChange={(e) => updateBadge(index, "description", e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            placeholder="Badge description"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stats Section */}
+                <div className="border-t pt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-4">
+                    Statistics (shown in dark bar below badges)
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {settings.stats.map((stat, index) => (
+                      <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                        <div className="mb-3">
+                          <label className="block text-xs font-medium text-gray-500 mb-1">
+                            Value
+                          </label>
+                          <input
+                            type="text"
+                            value={stat.value}
+                            onChange={(e) => updateStat(index, "value", e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            placeholder="10+"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">
+                            Label
+                          </label>
+                          <input
+                            type="text"
+                            value={stat.label}
+                            onChange={(e) => updateStat(index, "label", e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            placeholder="Years Experience"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Testimonials - Collapsible */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection("testimonials")}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-900">Testimonials</h3>
+              {expandedSections.testimonials ? (
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.testimonials && (
+              <div className="p-6 pt-2 border-t border-gray-100 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Section Title
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.testimonialsTitle}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, testimonialsTitle: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="What Our Customers Say"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Section Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.testimonialsSubtitle}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, testimonialsSubtitle: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Real reviews from satisfied customers"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Overall Rating
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="5"
+                      step="0.1"
+                      value={settings.overallRating}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, overallRating: parseFloat(e.target.value) || 5 }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Total Review Count
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={settings.reviewCount}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, reviewCount: parseInt(e.target.value) || 0 }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Google Reviews Link
+                    </label>
+                    <input
+                      type="url"
+                      value={settings.googleReviewsUrl}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, googleReviewsUrl: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="https://g.page/..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Testimonials
+                    </label>
                     <button
                       type="button"
-                      onClick={() => removeTestimonial(index)}
-                      className="text-gray-400 hover:text-red-500"
+                      onClick={addTestimonial}
+                      className="flex items-center gap-1 text-sm text-brand hover:text-brand-dark"
                     >
-                      <X className="w-5 h-5" />
+                      <Plus className="w-4 h-4" /> Add Testimonial
                     </button>
                   </div>
-                  <div className="space-y-3">
-                    <textarea
-                      value={item.text}
-                      onChange={(e) => updateTestimonial(index, "text", e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                      placeholder="Customer review text..."
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <input
-                        type="text"
-                        value={item.reviewerName}
-                        onChange={(e) => updateTestimonial(index, "reviewerName", e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                        placeholder="Reviewer name"
-                      />
-                      <input
-                        type="text"
-                        value={item.date || ""}
-                        onChange={(e) => updateTestimonial(index, "date", e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
-                        placeholder="Date (optional)"
-                      />
-                    </div>
+
+                  <div className="space-y-4">
+                    {settings.testimonials.map((item, index) => (
+                      <div key={item.id || index} className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-500">Review {index + 1}</span>
+                            <div className="flex">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => updateTestimonial(index, "rating", star)}
+                                  className="focus:outline-none"
+                                >
+                                  <Star
+                                    className={`w-5 h-5 ${
+                                      star <= item.rating
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeTestimonial(index)}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="space-y-3">
+                          <textarea
+                            value={item.text}
+                            onChange={(e) => updateTestimonial(index, "text", e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                            placeholder="Customer review text..."
+                          />
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input
+                              type="text"
+                              value={item.reviewerName}
+                              onChange={(e) => updateTestimonial(index, "reviewerName", e.target.value)}
+                              className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                              placeholder="Reviewer name"
+                            />
+                            <input
+                              type="text"
+                              value={item.date || ""}
+                              onChange={(e) => updateTestimonial(index, "date", e.target.value)}
+                              className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand text-sm"
+                              placeholder="Date (optional)"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {settings.testimonials.length === 0 && (
+                      <p className="text-gray-500 text-sm text-center py-8">
+                        No testimonials added yet. Click &quot;Add Testimonial&quot; to add one.
+                      </p>
+                    )}
                   </div>
                 </div>
-              ))}
-
-              {settings.testimonials.length === 0 && (
-                <p className="text-gray-500 text-sm text-center py-8">
-                  No testimonials added yet. Click &quot;Add Testimonial&quot; to add one.
-                </p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Footer Tab */}
-      {activeTab === "footer" && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Address
-            </label>
-            <input
-              type="text"
-              value={settings.address}
-              onChange={(e) => setSettings((prev) => ({ ...prev, address: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              placeholder="123 Main Street, City, State 12345"
-            />
-          </div>
-
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Map Embed</h3>
+      {/* Contact & Footer Tab - Merged Contact and Footer */}
+      {activeTab === "contact" && (
+        <div className="space-y-4">
+          {/* Contact Settings - Always visible */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
+            <h3 className="font-semibold text-gray-900">Contact Settings</h3>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Contact Mode
+              </label>
+              <select
+                value={settings.contactMode}
+                onChange={(e) => setSettings((prev) => ({ ...prev, contactMode: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+              >
+                <option value="form">Contact Form</option>
+                <option value="calendly">Calendly Scheduling</option>
+                <option value="phone">Phone Only</option>
+              </select>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Map Section Title
+                Phone Number
               </label>
               <input
-                type="text"
-                value={settings.mapTitle}
-                onChange={(e) => setSettings((prev) => ({ ...prev, mapTitle: e.target.value }))}
+                type="tel"
+                value={settings.phoneNumber}
+                onChange={(e) => setSettings((prev) => ({ ...prev, phoneNumber: e.target.value }))}
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="Our Service Area"
+                placeholder="(555) 123-4567"
               />
             </div>
 
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Google Maps Embed URL
-              </label>
-              <input
-                type="url"
-                value={settings.mapEmbedUrl}
-                onChange={(e) => setSettings((prev) => ({ ...prev, mapEmbedUrl: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                placeholder="https://www.google.com/maps/embed?pb=..."
-              />
-              <p className="text-sm text-gray-500 mt-2">
-                Go to Google Maps → Share → Embed a map → Copy the src URL from the iframe
-              </p>
-            </div>
+            {settings.contactMode === "calendly" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Calendly URL
+                </label>
+                <input
+                  type="url"
+                  value={settings.calendlyUrl}
+                  onChange={(e) => setSettings((prev) => ({ ...prev, calendlyUrl: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                  placeholder="https://calendly.com/yourbusiness"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Footer & Map - Collapsible */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleSection("footer")}
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="font-semibold text-gray-900">Footer & Map</h3>
+              {expandedSections.footer ? (
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
+              )}
+            </button>
+            {expandedSections.footer && (
+              <div className="p-6 pt-2 border-t border-gray-100 space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.address}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, address: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    placeholder="123 Main Street, City, State 12345"
+                  />
+                </div>
+
+                <div className="border-t pt-6">
+                  <h4 className="text-sm font-medium text-gray-900 mb-4">Map Embed</h4>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Map Section Title
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.mapTitle}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, mapTitle: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Our Service Area"
+                    />
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Google Maps Embed URL
+                    </label>
+                    <input
+                      type="url"
+                      value={settings.mapEmbedUrl}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, mapEmbedUrl: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="https://www.google.com/maps/embed?pb=..."
+                    />
+                    <p className="text-sm text-gray-500 mt-2">
+                      Go to Google Maps → Share → Embed a map → Copy the src URL from the iframe
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
