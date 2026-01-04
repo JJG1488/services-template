@@ -25,7 +25,7 @@ export function ServiceSection({ service, index }: ServiceSectionProps) {
             {service.images && service.images.length > 0 ? (
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
                 <img
-                  src={service.images[0]}
+                  src={service.images[0].url}
                   alt={service.name}
                   className="w-full h-full object-cover"
                 />
