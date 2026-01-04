@@ -1,0 +1,146 @@
+// Legal content for service business Terms of Service and Privacy Policy pages
+// Content is tailored for service-based businesses
+
+import { getStoreConfig } from "@/lib/store";
+
+export interface LegalSection {
+  title: string;
+  content: string;
+}
+
+export interface LegalDocument {
+  title: string;
+  effectiveDate: string;
+  lastUpdated: string;
+  sections: LegalSection[];
+}
+
+export function getTermsOfService(): LegalDocument {
+  const store = getStoreConfig();
+  const storeName = store.name || "Our Business";
+
+  return {
+    title: "Terms of Service",
+    effectiveDate: "January 1, 2025",
+    lastUpdated: "January 2025",
+    sections: [
+      {
+        title: "1. Acceptance of Terms",
+        content: `By requesting services from ${storeName}, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.`,
+      },
+      {
+        title: "2. Services Offered",
+        content: `${storeName} provides professional services as described on our website. Service descriptions, pricing, and availability are subject to change without prior notice. All services are subject to availability and scheduling.`,
+      },
+      {
+        title: "3. Scheduling and Appointments",
+        content: `Service appointments are scheduled based on availability. We strive to accommodate your preferred times but cannot guarantee specific appointment slots. You will receive confirmation of your scheduled appointment via email or phone.`,
+      },
+      {
+        title: "4. Cancellation and Rescheduling",
+        content: `We understand plans change. Please notify us at least 24 hours in advance if you need to cancel or reschedule your appointment. Late cancellations or no-shows may be subject to a cancellation fee. Emergency situations will be considered on a case-by-case basis.`,
+      },
+      {
+        title: "5. Estimates and Pricing",
+        content: `Prices quoted are estimates based on the information provided. Final pricing may vary based on the actual scope of work required. We will communicate any price changes before proceeding with additional work. Promotional pricing is subject to terms and conditions.`,
+      },
+      {
+        title: "6. Payment Terms",
+        content: `Payment is due upon completion of services unless otherwise agreed upon. We accept major credit cards and other payment methods as displayed at checkout. For larger projects, a deposit may be required before work begins.`,
+      },
+      {
+        title: "7. Service Guarantee",
+        content: `${storeName} is committed to customer satisfaction. If you are not satisfied with our services, please contact us within 48 hours of service completion. We will work with you to address any concerns and, if necessary, re-perform the service at no additional cost.`,
+      },
+      {
+        title: "8. Property Access and Liability",
+        content: `For services requiring property access, you agree to provide safe and reasonable access to work areas. You are responsible for securing valuable or fragile items before service. ${storeName} is not liable for damage to items not disclosed to our team prior to service.`,
+      },
+      {
+        title: "9. Insurance and Licensing",
+        content: `${storeName} maintains appropriate insurance and licensing for the services we provide. Certificates of insurance are available upon request. Our team members are trained professionals committed to quality workmanship.`,
+      },
+      {
+        title: "10. Limitation of Liability",
+        content: `${storeName}'s liability is limited to the cost of the services provided. We are not liable for indirect, incidental, or consequential damages. Our maximum liability shall not exceed the amount paid for the service in question.`,
+      },
+      {
+        title: "11. Privacy",
+        content: `Your privacy is important to us. Please review our Privacy Policy for information about how we collect, use, and protect your personal information.`,
+      },
+      {
+        title: "12. Modifications to Terms",
+        content: `We may update these terms from time to time. Changes will be posted on this page with an updated effective date. Your continued use of our services after changes constitutes acceptance of the new terms.`,
+      },
+      {
+        title: "13. Contact Information",
+        content: `For questions about these terms or our services, please visit our Contact page or call us during business hours.`,
+      },
+    ],
+  };
+}
+
+export function getPrivacyPolicy(): LegalDocument {
+  const store = getStoreConfig();
+  const storeName = store.name || "Our Business";
+
+  return {
+    title: "Privacy Policy",
+    effectiveDate: "January 1, 2025",
+    lastUpdated: "January 2025",
+    sections: [
+      {
+        title: "1. Information We Collect",
+        content: `We collect information you provide when requesting services, including your name, contact information (email, phone number), service address, and payment information. We may also collect information about your service preferences and history to better serve you.`,
+      },
+      {
+        title: "2. How We Use Your Information",
+        content: `We use your information to schedule and provide services, communicate with you about appointments and follow-ups, process payments, send appointment reminders and service updates, improve our services based on feedback, and comply with legal obligations.`,
+      },
+      {
+        title: "3. Information Sharing",
+        content: `We do not sell your personal information. We may share information with service providers who help us operate our business (payment processors, scheduling software). We may also share information when required by law or to protect our rights.`,
+      },
+      {
+        title: "4. Payment Security",
+        content: `All payment information is processed securely through Stripe. We do not store your credit card details on our servers. Stripe is PCI-DSS compliant and uses industry-standard encryption.`,
+      },
+      {
+        title: "5. Communication Preferences",
+        content: `We may send you service-related communications including appointment confirmations, reminders, and follow-ups. You can opt out of marketing communications at any time. Service-related messages cannot be opted out of while you have active appointments.`,
+      },
+      {
+        title: "6. Data Retention",
+        content: `We retain your information for as long as necessary to provide services and maintain our business relationship. Service history is retained for quality assurance and to serve you better on future visits. You can request deletion of your personal information by contacting us.`,
+      },
+      {
+        title: "7. Your Rights",
+        content: `You have the right to access your personal information, request corrections to inaccurate data, request deletion of your data, and opt out of marketing communications. To exercise these rights, please contact us through our Contact page.`,
+      },
+      {
+        title: "8. Security Measures",
+        content: `We implement appropriate security measures to protect your personal information, including encryption, secure servers, and access controls. However, no method of transmission over the Internet is 100% secure.`,
+      },
+      {
+        title: "9. Cookies and Tracking",
+        content: `Our website uses essential cookies for functionality. We may use analytics to understand how visitors use our site. You can manage cookie preferences in your browser settings.`,
+      },
+      {
+        title: "10. Third-Party Links",
+        content: `Our website may contain links to third-party websites. We are not responsible for the privacy practices of these websites. We encourage you to review their privacy policies.`,
+      },
+      {
+        title: "11. Children's Privacy",
+        content: `Our services are not intended for children under 13. We do not knowingly collect information from children. If you believe a child has provided us with personal information, please contact us.`,
+      },
+      {
+        title: "12. Changes to This Policy",
+        content: `We may update this privacy policy from time to time. Changes will be posted on this page with an updated effective date. We encourage you to review this policy periodically.`,
+      },
+      {
+        title: "13. Contact Us",
+        content: `For privacy-related questions or to exercise your rights, please visit our Contact page or reach out during business hours.`,
+      },
+    ],
+  };
+}

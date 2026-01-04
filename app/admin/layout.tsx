@@ -60,22 +60,64 @@ function LoginForm({ onLogin }: { onLogin: (password: string) => Promise<boolean
   );
 }
 
+interface EnabledFeatures {
+  menuSystem: boolean;
+  bookingSystem: boolean;
+  portfolioGallery: boolean;
+  quoteRequests: boolean;
+  testimonials: boolean;
+  teamMembers: boolean;
+  faqSection: boolean;
+}
+
 function AdminNav({ onLogout }: { onLogout: () => void }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [enabledFeatures, setEnabledFeatures] = useState<EnabledFeatures | null>(null);
 
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const links = [
-    { href: "/admin", label: "Dashboard" },
-    { href: "/admin/services", label: "Services" },
-    { href: "/admin/portfolio", label: "Portfolio" },
-    { href: "/admin/menu", label: "Menu" },
-    { href: "/admin/inquiries", label: "Inquiries" },
-    { href: "/admin/settings", label: "Settings" },
+  // Fetch enabled features on mount
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const token = localStorage.getItem("admin_token");
+        const res = await fetch("/api/admin/settings", {
+          headers: { Authorization: "Bearer " + token },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings?.enabledFeatures) {
+            setEnabledFeatures(data.settings.enabledFeatures);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching settings for nav:", err);
+      }
+    }
+    fetchSettings();
+  }, []);
+
+  // All possible nav links with feature requirements
+  const allLinks = [
+    { href: "/admin", label: "Dashboard", always: true },
+    { href: "/admin/services", label: "Services", always: true },
+    { href: "/admin/portfolio", label: "Portfolio", feature: "portfolioGallery" as keyof EnabledFeatures },
+    { href: "/admin/menu", label: "Menu", feature: "menuSystem" as keyof EnabledFeatures },
+    { href: "/admin/inquiries", label: "Inquiries", always: true },
+    { href: "/admin/settings", label: "Settings", always: true },
   ];
+
+  // Filter links based on enabled features
+  const links = allLinks.filter((link) => {
+    if (link.always) return true;
+    if (!enabledFeatures) return true; // Show all while loading
+    if (link.feature) return enabledFeatures[link.feature];
+    return true;
+  });
 
   return (
     <nav className="bg-gray-900 text-white">

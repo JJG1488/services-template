@@ -30,13 +30,32 @@ export function Header({ settings, storeName }: HeaderProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
+  // Build nav links based on enabled features
+  const navLinks: { href: string; label: string }[] = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
-    { href: "/contact", label: "Contact" },
   ];
 
-  if (settings.showFaq) {
+  // Menu link - only for businesses with menu system enabled
+  if (settings.enabledFeatures?.menuSystem) {
+    navLinks.push({ href: "/menu", label: "Menu" });
+  }
+
+  // Portfolio link - for businesses with portfolio gallery enabled
+  if (settings.enabledFeatures?.portfolioGallery) {
+    navLinks.push({ href: "/portfolio", label: "Portfolio" });
+  }
+
+  // Booking link - if booking system is enabled and URL is configured
+  if (settings.enabledFeatures?.bookingSystem && settings.showBookingPage) {
+    navLinks.push({ href: "/booking", label: "Booking" });
+  }
+
+  // Contact is always shown
+  navLinks.push({ href: "/contact", label: "Contact" });
+
+  // FAQ - based on setting toggle
+  if (settings.enabledFeatures?.faqSection || settings.showFaq) {
     navLinks.push({ href: "/faq", label: "FAQ" });
   }
 

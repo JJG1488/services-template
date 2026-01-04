@@ -13,13 +13,32 @@ export function Footer({ settings, storeName }: FooterProps) {
   const store = getStoreConfig();
   const currentYear = new Date().getFullYear();
 
-  const quickLinks = [
+  // Build quick links based on enabled features
+  const quickLinks: { href: string; label: string }[] = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
-    { href: "/contact", label: "Contact" },
   ];
 
-  if (settings.showFaq) {
+  // Menu link - only for businesses with menu system enabled
+  if (settings.enabledFeatures?.menuSystem) {
+    quickLinks.push({ href: "/menu", label: "Menu" });
+  }
+
+  // Portfolio link - for businesses with portfolio gallery enabled
+  if (settings.enabledFeatures?.portfolioGallery) {
+    quickLinks.push({ href: "/portfolio", label: "Portfolio" });
+  }
+
+  // Booking link - if booking system is enabled and URL is configured
+  if (settings.enabledFeatures?.bookingSystem && settings.showBookingPage) {
+    quickLinks.push({ href: "/booking", label: "Booking" });
+  }
+
+  // Contact is always shown
+  quickLinks.push({ href: "/contact", label: "Contact" });
+
+  // FAQ - based on enabled features or setting toggle
+  if (settings.enabledFeatures?.faqSection || settings.showFaq) {
     quickLinks.push({ href: "/faq", label: "FAQ" });
   }
 

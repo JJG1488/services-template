@@ -60,8 +60,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      {settings.showTestimonials &&
+      {/* Testimonials - respects both enabledFeatures and showTestimonials toggle */}
+      {(settings.enabledFeatures?.testimonials !== false) &&
+        settings.showTestimonials &&
         settings.testimonials &&
         settings.testimonials.length > 0 && (
           <Testimonials settings={settings} storeName={store.name} />

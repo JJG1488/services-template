@@ -2,6 +2,113 @@ import { createFreshAdminClient, getStoreId, isBuildTime } from "@/lib/supabase"
 import { getStoreConfig } from "@/lib/store";
 
 /**
+ * Business type for service businesses
+ */
+export type BusinessType =
+  | "restaurant"
+  | "catering"
+  | "contractor"
+  | "salon"
+  | "professional"
+  | "cleaning"
+  | "custom";
+
+/**
+ * Feature flags that can be enabled/disabled per business type
+ */
+export interface EnabledFeatures {
+  menuSystem: boolean;
+  bookingSystem: boolean;
+  portfolioGallery: boolean;
+  quoteRequests: boolean;
+  testimonials: boolean;
+  teamMembers: boolean;
+  faqSection: boolean;
+}
+
+/**
+ * Business type presets with default feature configurations
+ */
+export const businessTypePresets: Record<BusinessType, EnabledFeatures> = {
+  restaurant: {
+    menuSystem: true,
+    bookingSystem: false,
+    portfolioGallery: false,
+    quoteRequests: false,
+    testimonials: true,
+    teamMembers: false,
+    faqSection: true,
+  },
+  catering: {
+    menuSystem: true,
+    bookingSystem: true,
+    portfolioGallery: true,
+    quoteRequests: true,
+    testimonials: true,
+    teamMembers: true,
+    faqSection: true,
+  },
+  contractor: {
+    menuSystem: false,
+    bookingSystem: true,
+    portfolioGallery: true,
+    quoteRequests: true,
+    testimonials: true,
+    teamMembers: true,
+    faqSection: true,
+  },
+  salon: {
+    menuSystem: false,
+    bookingSystem: true,
+    portfolioGallery: true,
+    quoteRequests: false,
+    testimonials: true,
+    teamMembers: true,
+    faqSection: true,
+  },
+  professional: {
+    menuSystem: false,
+    bookingSystem: true,
+    portfolioGallery: false,
+    quoteRequests: false,
+    testimonials: true,
+    teamMembers: true,
+    faqSection: true,
+  },
+  cleaning: {
+    menuSystem: false,
+    bookingSystem: true,
+    portfolioGallery: true,
+    quoteRequests: true,
+    testimonials: true,
+    teamMembers: false,
+    faqSection: true,
+  },
+  custom: {
+    menuSystem: false,
+    bookingSystem: false,
+    portfolioGallery: false,
+    quoteRequests: false,
+    testimonials: false,
+    teamMembers: false,
+    faqSection: false,
+  },
+};
+
+/**
+ * Business type display labels
+ */
+export const businessTypeLabels: Record<BusinessType, string> = {
+  restaurant: "Restaurant / Food Service",
+  catering: "Catering / Events",
+  contractor: "Contractor / Home Services",
+  salon: "Salon / Spa / Beauty",
+  professional: "Professional Services",
+  cleaning: "Cleaning Service",
+  custom: "Custom (Configure Manually)",
+};
+
+/**
  * Process step for the "How It Works" section
  */
 export interface ProcessStep {
@@ -70,6 +177,10 @@ export interface Testimonial {
  * Runtime store settings for services template
  */
 export interface RuntimeSettings {
+  // Business Type System
+  businessType: BusinessType;
+  enabledFeatures: EnabledFeatures;
+
   // Branding
   themePreset: string;
   brandColor: string; // Admin-configurable brand color (hex)
@@ -168,6 +279,10 @@ export interface RuntimeSettings {
 function getDefaultSettings(): RuntimeSettings {
   const config = getStoreConfig();
   return {
+    // Business Type System
+    businessType: "custom" as BusinessType,
+    enabledFeatures: businessTypePresets.custom,
+
     // Branding
     themePreset: config.themePreset || "default",
     brandColor: config.primaryColor || "#FFD700",
@@ -306,6 +421,10 @@ export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
       const s = data.settings;
       // Merge database settings with defaults (DB takes precedence)
       return {
+        // Business Type System
+        businessType: s.businessType || defaults.businessType,
+        enabledFeatures: s.enabledFeatures || defaults.enabledFeatures,
+
         // Branding
         themePreset: s.themePreset || defaults.themePreset,
         brandColor: s.brandColor || defaults.brandColor,
