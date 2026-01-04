@@ -1,8 +1,8 @@
 import { Leaf, Wheat, Fish, Egg, Milk, Nut, Flame, AlertTriangle } from "lucide-react";
-import type { DietaryTag, Allergen, dietaryTagConfig, allergenConfig } from "@/types/menu";
+import type { DietaryTag, Allergen } from "@/types/menu";
 
-// Import configs from menu types
-const tagConfig: typeof dietaryTagConfig = {
+// Local config for dietary tags
+const tagConfig: Record<string, { label: string; icon: string; color: string }> = {
   vegetarian: {
     label: "Vegetarian",
     icon: "leaf",
