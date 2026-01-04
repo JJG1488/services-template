@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin, getStoreId } from "@/lib/supabase";
+import { generateMenuSlug } from "@/types/menu";
 
 export const dynamic = "force-dynamic";
 
-// Helper to generate slug from name
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .trim();
-}
-
-// GET - List all services
+// GET - List all categories with item counts
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
@@ -24,21 +15,31 @@ export async function GET() {
     }
 
     const { data, error } = await supabase
-      .from("services")
-      .select("*")
+      .from("menu_categories")
+      .select(`
+        *,
+        menu_items(count)
+      `)
       .eq("store_id", storeId)
       .order("display_order", { ascending: true });
 
     if (error) throw error;
 
-    return NextResponse.json(data);
+    // Transform to include item_count
+    const categories = (data || []).map((cat) => ({
+      ...cat,
+      item_count: cat.menu_items?.[0]?.count || 0,
+      menu_items: undefined,
+    }));
+
+    return NextResponse.json(categories);
   } catch (error) {
-    console.error("Error fetching services:", error);
-    return NextResponse.json({ error: "Failed to fetch services" }, { status: 500 });
+    console.error("Error fetching menu categories:", error);
+    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
   }
 }
 
-// POST - Create new service
+// POST - Create new category
 export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabaseAdmin();
@@ -51,11 +52,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Generate slug if not provided
-    const slug = body.slug || generateSlug(body.name);
+    const slug = body.slug || generateMenuSlug(body.name);
 
     // Get max display_order
     const { data: maxOrder } = await supabase
-      .from("services")
+      .from("menu_categories")
       .select("display_order")
       .eq("store_id", storeId)
       .order("display_order", { ascending: false })
@@ -65,27 +66,15 @@ export async function POST(request: NextRequest) {
     const displayOrder = (maxOrder?.display_order || 0) + 1;
 
     const { data, error } = await supabase
-      .from("services")
+      .from("menu_categories")
       .insert({
         store_id: storeId,
         name: body.name,
         slug,
-        short_description: body.short_description || null,
         description: body.description || null,
-        price: body.price || null,
-        price_type: body.price_type || "fixed",
-        duration: body.duration || null,
-        images: body.images || [],
-        icon: body.icon || null,
-        features: body.features || [],
-        category: body.category || null,
-        tags: body.tags || null,
+        image_url: body.image_url || null,
         display_order: displayOrder,
-        is_featured: body.is_featured || false,
         is_active: body.is_active !== false,
-        seo_title: body.seo_title || null,
-        seo_description: body.seo_description || null,
-        external_url: body.external_url || null,
       })
       .select()
       .single();
@@ -94,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Error creating service:", error);
-    return NextResponse.json({ error: "Failed to create service" }, { status: 500 });
+    console.error("Error creating menu category:", error);
+    return NextResponse.json({ error: "Failed to create category" }, { status: 500 });
   }
 }

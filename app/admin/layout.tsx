@@ -71,6 +71,8 @@ function AdminNav({ onLogout }: { onLogout: () => void }) {
   const links = [
     { href: "/admin", label: "Dashboard" },
     { href: "/admin/services", label: "Services" },
+    { href: "/admin/portfolio", label: "Portfolio" },
+    { href: "/admin/menu", label: "Menu" },
     { href: "/admin/inquiries", label: "Inquiries" },
     { href: "/admin/settings", label: "Settings" },
   ];

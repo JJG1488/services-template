@@ -1,29 +1,17 @@
 import Link from "next/link";
-import { ArrowRight, Wrench, Home, Hammer, PaintBucket, Zap } from "lucide-react";
+import { ArrowRight, ExternalLink, Images } from "lucide-react";
 import type { Service } from "@/data/services";
+import { DynamicIcon } from "./DynamicIcon";
 
 interface ServiceGridProps {
   services: Service[];
   showAll?: boolean;
-}
-
-// Map icon names to Lucide components
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  wrench: Wrench,
-  home: Home,
-  hammer: Hammer,
-  paintbucket: PaintBucket,
-  zap: Zap,
-};
-
-function getIcon(iconName: string | null): React.ComponentType<{ className?: string }> {
-  if (!iconName) return Wrench;
-  return iconMap[iconName.toLowerCase()] || Wrench;
+  portfolioServiceIds?: string[]; // Service IDs that have portfolio items
 }
 
 function formatPrice(price: number | null, priceType: string): string {
   if (price === null) return "Contact for pricing";
-  
+
   const formatted = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -42,7 +30,7 @@ function formatPrice(price: number | null, priceType: string): string {
   }
 }
 
-export function ServiceGrid({ services, showAll = false }: ServiceGridProps) {
+export function ServiceGrid({ services, showAll = false, portfolioServiceIds = [] }: ServiceGridProps) {
   const displayServices = showAll ? services : services.slice(0, 6);
 
   if (services.length === 0) {
@@ -57,52 +45,110 @@ export function ServiceGrid({ services, showAll = false }: ServiceGridProps) {
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {displayServices.map((service, index) => {
-          const Icon = getIcon(service.icon);
+          // Get first image URL if available
+          let imageUrl: string | null = null;
+          if (service.images && service.images.length > 0) {
+            const firstImage = service.images[0];
+            imageUrl = typeof firstImage === "string" ? firstImage : firstImage.url;
+          }
+
+          const hasPortfolio = portfolioServiceIds.includes(service.id);
+
           return (
             <Link
               key={service.id}
               href={"/services/" + service.slug}
-              className={"group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover stagger-" + ((index % 5) + 1)}
+              className={"group bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 card-hover stagger-" + ((index % 5) + 1)}
             >
-              {/* Icon */}
-              <div className="w-14 h-14 rounded-xl bg-brand/10 flex items-center justify-center mb-4 group-hover:bg-brand/20 transition-colors">
-                <Icon className="w-7 h-7 text-brand" />
-              </div>
+              {/* Image or Icon Header */}
+              {imageUrl ? (
+                <div className="aspect-[16/9] overflow-hidden bg-gray-100 relative">
+                  <img
+                    src={imageUrl}
+                    alt={service.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {/* Badges overlay */}
+                  <div className="absolute top-3 right-3 flex gap-2">
+                    {service.is_featured && (
+                      <span className="bg-brand text-gray-900 text-xs font-medium px-2 py-1 rounded shadow-sm">
+                        Featured
+                      </span>
+                    )}
+                    {hasPortfolio && (
+                      <span className="bg-gray-900 text-white text-xs font-medium px-2 py-1 rounded shadow-sm flex items-center gap-1">
+                        <Images className="w-3 h-3" />
+                        Gallery
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="aspect-[16/9] bg-gradient-to-br from-brand/5 to-brand/10 flex items-center justify-center relative">
+                  <div className="w-16 h-16 rounded-full bg-brand/10 flex items-center justify-center">
+                    <DynamicIcon name={service.icon} className="w-8 h-8 text-brand" />
+                  </div>
+                  {/* Badges overlay */}
+                  <div className="absolute top-3 right-3 flex gap-2">
+                    {service.is_featured && (
+                      <span className="bg-brand text-gray-900 text-xs font-medium px-2 py-1 rounded shadow-sm">
+                        Featured
+                      </span>
+                    )}
+                    {hasPortfolio && (
+                      <span className="bg-gray-900 text-white text-xs font-medium px-2 py-1 rounded shadow-sm flex items-center gap-1">
+                        <Images className="w-3 h-3" />
+                        Gallery
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Content */}
-              <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-brand transition-colors">
-                {service.name}
-              </h3>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-brand transition-colors">
+                  {service.name}
+                </h3>
 
-              {service.short_description && (
-                <p className="text-gray-600 mb-4 line-clamp-2">
-                  {service.short_description}
-                </p>
-              )}
+                {service.short_description && (
+                  <p className="text-gray-600 mb-4 line-clamp-2">
+                    {service.short_description}
+                  </p>
+                )}
 
-              {/* Price */}
-              {service.price !== null && (
-                <p className="text-brand font-semibold mb-4">
-                  {formatPrice(service.price, service.price_type)}
-                </p>
-              )}
+                {/* Price */}
+                {service.price !== null && (
+                  <p className="text-brand font-semibold mb-4">
+                    {formatPrice(service.price, service.price_type)}
+                  </p>
+                )}
 
-              {/* Features Preview */}
-              {service.features && service.features.length > 0 && (
-                <ul className="space-y-1 mb-4">
-                  {service.features.slice(0, 3).map((feature, i) => (
-                    <li key={i} className="text-sm text-gray-500 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-brand rounded-full" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              )}
+                {/* Features Preview */}
+                {service.features && service.features.length > 0 && (
+                  <ul className="space-y-1 mb-4">
+                    {service.features.slice(0, 3).map((feature, i) => (
+                      <li key={i} className="text-sm text-gray-500 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-brand rounded-full" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-              {/* Learn More */}
-              <div className="flex items-center gap-2 text-brand font-medium group-hover:gap-3 transition-all">
-                Learn More
-                <ArrowRight className="w-4 h-4" />
+                {/* Footer */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-brand font-medium group-hover:gap-3 transition-all">
+                    Learn More
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                  {service.external_url && (
+                    <span className="text-gray-400 flex items-center gap-1 text-xs">
+                      <ExternalLink className="w-3 h-3" />
+                      Demo
+                    </span>
+                  )}
+                </div>
               </div>
             </Link>
           );

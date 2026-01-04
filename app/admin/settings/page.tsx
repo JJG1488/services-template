@@ -25,6 +25,15 @@ interface Settings {
   calendlyUrl: string;
   phoneNumber: string;
 
+  // Booking
+  bookingUrl: string;
+  bookingDisplayMode: string;
+  bookingButtonText: string;
+  bookingDescription: string;
+  showBookingOnHero: boolean;
+  showBookingOnServicePages: boolean;
+  showBookingPage: boolean;
+
   // Section toggles
   showProcess: boolean;
   showStats: boolean;
@@ -99,6 +108,13 @@ const defaultSettings: Settings = {
   contactMode: "form",
   calendlyUrl: "",
   phoneNumber: "",
+  bookingUrl: "",
+  bookingDisplayMode: "embed",
+  bookingButtonText: "Book Now",
+  bookingDescription: "Schedule your appointment online",
+  showBookingOnHero: false,
+  showBookingOnServicePages: false,
+  showBookingPage: true,
   showProcess: true,
   showStats: true,
   showTeam: false,
@@ -1567,6 +1583,135 @@ export default function SettingsPage() {
                   placeholder="https://calendly.com/yourbusiness"
                 />
               </div>
+            )}
+          </div>
+
+          {/* Booking Integration */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">Booking Integration</h3>
+              <p className="text-sm text-gray-500">
+                Connect a third-party booking system like Calendly, Cal.com, Acuity, or any scheduling tool
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Booking URL
+              </label>
+              <input
+                type="url"
+                value={settings.bookingUrl}
+                onChange={(e) => setSettings((prev) => ({ ...prev, bookingUrl: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                placeholder="https://calendly.com/yourbusiness or https://cal.com/yourname"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                Supports Calendly, Cal.com, Acuity, Square, and most other booking platforms
+              </p>
+            </div>
+
+            {settings.bookingUrl && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Display Mode
+                    </label>
+                    <select
+                      value={settings.bookingDisplayMode}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, bookingDisplayMode: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    >
+                      <option value="embed">Embed (inline calendar)</option>
+                      <option value="popup">Popup (modal window)</option>
+                      <option value="link">Link (opens in new tab)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.bookingButtonText}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, bookingButtonText: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                      placeholder="Book Now"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description Text (shown above booking widget)
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.bookingDescription}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, bookingDescription: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+                    placeholder="Schedule your appointment online"
+                  />
+                </div>
+
+                <div className="border-t pt-6">
+                  <h4 className="text-sm font-medium text-gray-900 mb-4">
+                    Where to Show Booking
+                  </h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.showBookingOnHero}
+                        onChange={(e) => setSettings((prev) => ({ ...prev, showBookingOnHero: e.target.checked }))}
+                        className="w-5 h-5 text-brand focus:ring-brand rounded"
+                      />
+                      <span className="text-gray-700">Show booking button in Hero section</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.showBookingOnServicePages}
+                        onChange={(e) => setSettings((prev) => ({ ...prev, showBookingOnServicePages: e.target.checked }))}
+                        className="w-5 h-5 text-brand focus:ring-brand rounded"
+                      />
+                      <span className="text-gray-700">Show booking widget on individual service pages</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.showBookingPage}
+                        onChange={(e) => setSettings((prev) => ({ ...prev, showBookingPage: e.target.checked }))}
+                        className="w-5 h-5 text-brand focus:ring-brand rounded"
+                      />
+                      <span className="text-gray-700">Create dedicated /booking page</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="border-t pt-6">
+                  <h4 className="text-sm font-medium text-gray-900 mb-4">
+                    Preview
+                  </h4>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    {settings.bookingDisplayMode === "embed" ? (
+                      <div className="text-center text-gray-500 py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                        <p>Calendar embed will appear here</p>
+                        <p className="text-sm mt-1">Height: 630px</p>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-2 bg-brand text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-brand-dark transition-colors"
+                      >
+                        {settings.bookingButtonText || "Book Now"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </div>
 

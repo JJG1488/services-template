@@ -25,6 +25,18 @@ export function formatPrice(priceInCents: number | null, priceType: string = "fi
   }
 }
 
+/**
+ * Portfolio image with optional metadata
+ */
+export interface PortfolioImage {
+  url: string;
+  alt?: string;
+  caption?: string;
+  is_before?: boolean;
+  is_after?: boolean;
+  position: number;
+}
+
 export interface Service {
   id: string;
   store_id: string;
@@ -35,7 +47,7 @@ export interface Service {
   price: number | null;
   price_type: string;
   duration: string | null;
-  images: string[];
+  images: PortfolioImage[];
   icon: string | null;
   features: string[];
   category: string | null;
@@ -45,6 +57,7 @@ export interface Service {
   is_active: boolean;
   seo_title: string | null;
   seo_description: string | null;
+  external_url: string | null;
   created_at: string;
   updated_at: string;
 }

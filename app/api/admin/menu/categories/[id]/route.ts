@@ -3,7 +3,7 @@ import { getSupabaseAdmin, getStoreId } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-// GET - Get single service
+// GET - Get single category with items
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -18,8 +18,11 @@ export async function GET(
     }
 
     const { data, error } = await supabase
-      .from("services")
-      .select("*")
+      .from("menu_categories")
+      .select(`
+        *,
+        menu_items(*)
+      `)
       .eq("store_id", storeId)
       .eq("id", id)
       .single();
@@ -27,17 +30,17 @@ export async function GET(
     if (error) throw error;
 
     if (!data) {
-      return NextResponse.json({ error: "Service not found" }, { status: 404 });
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching service:", error);
-    return NextResponse.json({ error: "Failed to fetch service" }, { status: 500 });
+    console.error("Error fetching menu category:", error);
+    return NextResponse.json({ error: "Failed to fetch category" }, { status: 500 });
   }
 }
 
-// PUT - Update service
+// PUT - Update category
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -54,25 +57,14 @@ export async function PUT(
     const body = await request.json();
 
     const { data, error } = await supabase
-      .from("services")
+      .from("menu_categories")
       .update({
         name: body.name,
         slug: body.slug,
-        short_description: body.short_description,
         description: body.description,
-        price: body.price,
-        price_type: body.price_type,
-        duration: body.duration,
-        images: body.images || [],
-        icon: body.icon,
-        features: body.features || [],
-        category: body.category,
-        tags: body.tags,
-        is_featured: body.is_featured,
+        image_url: body.image_url,
+        display_order: body.display_order,
         is_active: body.is_active,
-        seo_title: body.seo_title,
-        seo_description: body.seo_description,
-        external_url: body.external_url || null,
         updated_at: new Date().toISOString(),
       })
       .eq("store_id", storeId)
@@ -84,12 +76,12 @@ export async function PUT(
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error updating service:", error);
-    return NextResponse.json({ error: "Failed to update service" }, { status: 500 });
+    console.error("Error updating menu category:", error);
+    return NextResponse.json({ error: "Failed to update category" }, { status: 500 });
   }
 }
 
-// DELETE - Delete service
+// DELETE - Delete category (items will have category_id set to NULL)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -104,7 +96,7 @@ export async function DELETE(
     }
 
     const { error } = await supabase
-      .from("services")
+      .from("menu_categories")
       .delete()
       .eq("store_id", storeId)
       .eq("id", id);
@@ -113,7 +105,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting service:", error);
-    return NextResponse.json({ error: "Failed to delete service" }, { status: 500 });
+    console.error("Error deleting menu category:", error);
+    return NextResponse.json({ error: "Failed to delete category" }, { status: 500 });
   }
 }

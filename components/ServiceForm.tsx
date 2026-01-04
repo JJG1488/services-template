@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Trash2, X, Plus } from "lucide-react";
-import type { Service } from "@/data/services";
+import { Save, Trash2, X, Plus, ExternalLink } from "lucide-react";
+import type { Service, PortfolioImage } from "@/data/services";
+import { IconPicker } from "./IconPicker";
+import { MultiImageUpload } from "./MultiImageUpload";
 
 interface ServiceFormProps {
   service?: Service;
@@ -24,13 +26,16 @@ export function ServiceForm({ service, isNew = false }: ServiceFormProps) {
     price: service?.price ? (service.price / 100).toString() : "",
     price_type: service?.price_type || "fixed",
     duration: service?.duration || "",
-    icon: service?.icon || "",
+    icon: service?.icon || "wrench",
     features: service?.features || [],
     category: service?.category || "",
     is_featured: service?.is_featured || false,
     is_active: service?.is_active !== false,
     seo_title: service?.seo_title || "",
     seo_description: service?.seo_description || "",
+    // New fields for modular system
+    images: service?.images || [] as PortfolioImage[],
+    external_url: service?.external_url || "",
   });
 
   const [newFeature, setNewFeature] = useState("");
@@ -194,6 +199,73 @@ export function ServiceForm({ service, isNew = false }: ServiceFormProps) {
               placeholder="Detailed description of the service"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Icon & Appearance */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <h2 className="text-lg font-semibold mb-4">Icon & Appearance</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <IconPicker
+              value={formData.icon}
+              onChange={(icon) => setFormData((prev) => ({ ...prev, icon }))}
+              label="Service Icon"
+              placeholder="Select an icon for this service"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Choose an icon that represents this service
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category
+            </label>
+            <input
+              type="text"
+              value={formData.category}
+              onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+              placeholder="e.g., Roofing, Plumbing, Consulting"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Images */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <h2 className="text-lg font-semibold mb-4">Service Images</h2>
+
+        <MultiImageUpload
+          images={formData.images}
+          onChange={(images) => setFormData((prev) => ({ ...prev, images }))}
+          maxImages={8}
+          label="Work Examples & Gallery"
+          helpText="Upload images showcasing this service. These will appear on the service detail page."
+        />
+      </div>
+
+      {/* External Link */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <h2 className="text-lg font-semibold mb-4">External Link</h2>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <ExternalLink className="w-4 h-4 inline-block mr-1" />
+            External URL (optional)
+          </label>
+          <input
+            type="url"
+            value={formData.external_url}
+            onChange={(e) => setFormData((prev) => ({ ...prev, external_url: e.target.value }))}
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+            placeholder="https://example.com/my-work"
+          />
+          <p className="text-xs text-gray-500 mt-2">
+            Link to a live demo, booking page, or external portfolio. A &quot;View&quot; button will appear on the service card.
+          </p>
         </div>
       </div>
 
