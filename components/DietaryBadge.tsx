@@ -113,6 +113,8 @@ const allergenDetails: Record<Allergen, { label: string; icon: string; color: st
   shellfish: { label: "Shellfish", icon: "fish", color: "red" },
   eggs: { label: "Eggs", icon: "egg", color: "yellow" },
   soy: { label: "Soy", icon: "alert-triangle", color: "green" },
+  fish: { label: "Fish", icon: "fish", color: "blue" },
+  sesame: { label: "Sesame", icon: "alert-triangle", color: "yellow" },
 };
 
 export function AllergenBadge({ allergen, size = "sm" }: AllergenBadgeProps) {
