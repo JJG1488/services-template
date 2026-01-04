@@ -46,8 +46,8 @@ export function Header({ settings, storeName }: HeaderProps) {
     navLinks.push({ href: "/portfolio", label: "Portfolio" });
   }
 
-  // Booking link - if booking system is enabled and URL is configured
-  if (settings.enabledFeatures?.bookingSystem && settings.showBookingPage) {
+  // Booking link - if booking system is enabled
+  if (settings.enabledFeatures?.bookingSystem) {
     navLinks.push({ href: "/booking", label: "Booking" });
   }
 

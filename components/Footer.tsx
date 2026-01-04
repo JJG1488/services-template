@@ -29,8 +29,8 @@ export function Footer({ settings, storeName }: FooterProps) {
     quickLinks.push({ href: "/portfolio", label: "Portfolio" });
   }
 
-  // Booking link - if booking system is enabled and URL is configured
-  if (settings.enabledFeatures?.bookingSystem && settings.showBookingPage) {
+  // Booking link - if booking system is enabled
+  if (settings.enabledFeatures?.bookingSystem) {
     quickLinks.push({ href: "/booking", label: "Booking" });
   }
 
