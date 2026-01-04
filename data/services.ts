@@ -1,4 +1,4 @@
-import { getSupabaseAdmin, getStoreId } from "@/lib/supabase";
+import { getSupabaseAdmin, getStoreId, createFreshAdminClient } from "@/lib/supabase";
 
 /**
  * Format price in cents to display string.
@@ -72,10 +72,14 @@ export async function getServices(): Promise<Service[]> {
 }
 
 export async function getActiveServices(): Promise<Service[]> {
-  const supabase = getSupabaseAdmin();
+  const supabase = createFreshAdminClient();
   const storeId = getStoreId();
 
+  console.log("[getActiveServices] storeId:", storeId);
+  console.log("[getActiveServices] supabase:", !!supabase);
+
   if (!supabase || !storeId) {
+    console.log("[getActiveServices] Missing supabase or storeId, returning []");
     return [];
   }
 
@@ -86,6 +90,8 @@ export async function getActiveServices(): Promise<Service[]> {
     .eq("is_active", true)
     .order("display_order", { ascending: true });
 
+  console.log("[getActiveServices] data count:", data?.length, "error:", error);
+
   if (error) {
     console.error("Error fetching active services:", error);
     return [];
@@ -95,7 +101,7 @@ export async function getActiveServices(): Promise<Service[]> {
 }
 
 export async function getFeaturedServices(): Promise<Service[]> {
-  const supabase = getSupabaseAdmin();
+  const supabase = createFreshAdminClient();
   const storeId = getStoreId();
 
   if (!supabase || !storeId) {
@@ -119,7 +125,7 @@ export async function getFeaturedServices(): Promise<Service[]> {
 }
 
 export async function getServiceBySlug(slug: string): Promise<Service | null> {
-  const supabase = getSupabaseAdmin();
+  const supabase = createFreshAdminClient();
   const storeId = getStoreId();
 
   if (!supabase || !storeId) {
