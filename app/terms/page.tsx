@@ -9,7 +9,7 @@ export default function TermsPage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 py-12">
+      <div className="max-w-3xl mx-auto px-4 pt-24 pb-12">
         {/* Breadcrumb */}
         <nav className="mb-8">
           <Link

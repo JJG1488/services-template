@@ -33,7 +33,7 @@ export default function MenuPage() {
 
   return (
     <div className="bg-gray-50">
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main className="max-w-4xl mx-auto px-4 pt-24 pb-12">
         {/* Hero */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
