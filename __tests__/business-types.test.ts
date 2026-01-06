@@ -14,6 +14,9 @@
  * @date 2026-01-06
  */
 
+/**
+ * @jest-environment node
+ */
 import {
   type BusinessType,
   type BusinessCategory,
@@ -30,59 +33,89 @@ import {
   defaultFeatures,
 } from "../lib/business-types";
 
+// Type declarations for Jest (in case @types/jest not installed)
+declare const describe: (name: string, fn: () => void) => void;
+declare const it: (name: string, fn: () => void) => void;
+declare const expect: (value: unknown) => {
+  toBe: (expected: unknown) => void;
+  toBeDefined: () => void;
+  toBeTruthy: () => void;
+  toHaveLength: (length: number) => void;
+  toBeGreaterThan: (value: number) => void;
+  toBeGreaterThanOrEqual: (value: number) => void;
+  toBeLessThan: (value: number) => void;
+  toContain: (value: unknown) => void;
+};
+
 describe("Business Type System", () => {
   describe("businessTypeInfo", () => {
     it("should contain all expected business types", () => {
       const expectedTypes: BusinessType[] = [
+        // Food & Beverage
         "restaurant",
         "cafe",
         "catering",
-        "bakery",
         "food_truck",
-        "hair_salon",
+        "bakery",
+        "bar_lounge",
+        // Beauty & Wellness
+        "salon",
         "spa",
         "barbershop",
         "nail_salon",
+        "massage",
         "tattoo_studio",
+        // Home Services
+        "general_contractor",
         "plumber",
         "electrician",
         "hvac",
         "landscaping",
         "cleaning",
-        "roofing",
-        "painting",
-        "pest_control",
         "handyman",
-        "moving",
-        "lawyer",
-        "accountant",
+        "painter",
+        "roofer",
+        "pest_control",
+        "pool_service",
+        // Professional Services
         "consultant",
+        "law_firm",
+        "accounting",
+        "marketing_agency",
+        "it_services",
         "real_estate",
         "insurance",
         "financial_advisor",
-        "marketing",
-        "dentist",
-        "chiropractor",
-        "therapist",
-        "veterinarian",
-        "optometrist",
-        "physical_therapy",
+        // Health & Medical
+        "medical_practice",
+        "dental",
+        "therapy",
+        "fitness",
+        "chiropractic",
+        "optometry",
+        // Automotive
         "auto_repair",
         "auto_detailing",
+        "towing",
         "tire_shop",
-        "body_shop",
+        // Pet Services
         "pet_grooming",
+        "veterinary",
         "pet_sitting",
         "dog_training",
+        // Events & Creative
         "photography",
         "videography",
+        "dj_entertainment",
         "event_planning",
-        "dj",
         "florist",
+        "wedding_services",
+        // Education
         "tutoring",
         "music_lessons",
-        "fitness_training",
         "driving_school",
+        "language_school",
+        // Other
         "custom",
       ];
 
@@ -166,8 +199,8 @@ describe("Business Type System", () => {
       expect(defaults.licenseBadges).toBe(true);
     });
 
-    it("should return correct defaults for salon type (hair_salon)", () => {
-      const defaults = getFeatureDefaults("hair_salon");
+    it("should return correct defaults for salon type", () => {
+      const defaults = getFeatureDefaults("salon");
       expect(defaults.bookingSystem).toBe(true);
       expect(defaults.portfolioGallery).toBe(true);
       expect(defaults.teamMembers).toBe(true);
@@ -205,8 +238,8 @@ describe("Business Type System", () => {
       expect(preset.trustBadges.some((b) => b.text.toLowerCase().includes("licensed"))).toBe(true);
     });
 
-    it("should return content preset for hair_salon (beauty)", () => {
-      const preset = getContentPreset("hair_salon");
+    it("should return content preset for salon (beauty)", () => {
+      const preset = getContentPreset("salon");
       expect(preset.heroHeading).toBeTruthy();
       expect(preset.heroCTAText).toBeTruthy();
     });
@@ -221,14 +254,14 @@ describe("Business Type System", () => {
   describe("migrateBusinessType", () => {
     it("should migrate known legacy types", () => {
       expect(migrateBusinessType("contractor")).toBe("plumber");
-      expect(migrateBusinessType("salon")).toBe("hair_salon");
+      expect(migrateBusinessType("salon")).toBe("salon");
       expect(migrateBusinessType("professional")).toBe("consultant");
     });
 
     it("should pass through valid business types unchanged", () => {
       expect(migrateBusinessType("restaurant")).toBe("restaurant");
       expect(migrateBusinessType("plumber")).toBe("plumber");
-      expect(migrateBusinessType("hair_salon")).toBe("hair_salon");
+      expect(migrateBusinessType("salon")).toBe("salon");
     });
 
     it("should default unknown types to custom", () => {
@@ -405,7 +438,7 @@ describe("Integration Tests", () => {
 
   it("should support content preset application workflow", () => {
     // Step 1: User selects new business type
-    const type: BusinessType = "hair_salon";
+    const type: BusinessType = "salon";
 
     // Step 2: Get content preset
     const preset = getContentPreset(type);
