@@ -1,4 +1,4 @@
-import { getSupabaseAdmin, getStoreId, createFreshAdminClient } from "@/lib/supabase";
+import { getStoreId, createFreshAdminClient } from "@/lib/supabase";
 
 /**
  * Format price in cents to display string.
@@ -63,7 +63,8 @@ export interface Service {
 }
 
 export async function getServices(): Promise<Service[]> {
-  const supabase = getSupabaseAdmin();
+  // Use fresh client to avoid caching issues - admin needs up-to-date data
+  const supabase = createFreshAdminClient();
   const storeId = getStoreId();
 
   if (!supabase || !storeId) {
@@ -159,7 +160,8 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
 }
 
 export async function getServiceById(id: string): Promise<Service | null> {
-  const supabase = getSupabaseAdmin();
+  // Use fresh client to avoid caching issues
+  const supabase = createFreshAdminClient();
   const storeId = getStoreId();
 
   if (!supabase || !storeId) {
