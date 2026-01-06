@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LayoutDashboard, Briefcase, Image, UtensilsCrossed, MessageSquare, Settings, Calendar } from "lucide-react";
 import { AdminContext } from "@/lib/admin-context";
+import type { EnabledFeatures } from "@/lib/business-types";
 
 function LoginForm({ onLogin }: { onLogin: (password: string) => Promise<boolean> }) {
   const [password, setPassword] = useState("");
@@ -60,20 +61,22 @@ function LoginForm({ onLogin }: { onLogin: (password: string) => Promise<boolean
   );
 }
 
-interface EnabledFeatures {
-  menuSystem: boolean;
-  bookingSystem: boolean;
-  portfolioGallery: boolean;
-  quoteRequests: boolean;
-  testimonials: boolean;
-  teamMembers: boolean;
-  faqSection: boolean;
+/**
+ * Navigation link definition with feature gating
+ */
+interface NavLink {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  always?: boolean;
+  feature?: keyof EnabledFeatures;
 }
 
 function AdminNav({ onLogout }: { onLogout: () => void }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [enabledFeatures, setEnabledFeatures] = useState<EnabledFeatures | null>(null);
+  const [businessType, setBusinessType] = useState<string>("custom");
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -93,6 +96,9 @@ function AdminNav({ onLogout }: { onLogout: () => void }) {
           if (data.settings?.enabledFeatures) {
             setEnabledFeatures(data.settings.enabledFeatures);
           }
+          if (data.settings?.businessType) {
+            setBusinessType(data.settings.businessType);
+          }
         }
       } catch (err) {
         console.error("Error fetching settings for nav:", err);
@@ -101,17 +107,18 @@ function AdminNav({ onLogout }: { onLogout: () => void }) {
     fetchSettings();
   }, []);
 
-  // All possible nav links with feature requirements
-  const allLinks = [
-    { href: "/admin", label: "Dashboard", always: true },
-    { href: "/admin/services", label: "Services", always: true },
-    { href: "/admin/portfolio", label: "Portfolio", feature: "portfolioGallery" as keyof EnabledFeatures },
-    { href: "/admin/menu", label: "Menu", feature: "menuSystem" as keyof EnabledFeatures },
-    { href: "/admin/inquiries", label: "Inquiries", always: true },
-    { href: "/admin/settings", label: "Settings", always: true },
+  // All possible nav links with feature requirements (Enhanced v9.37)
+  const allLinks: NavLink[] = [
+    { href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" />, always: true },
+    { href: "/admin/services", label: "Services", icon: <Briefcase className="w-4 h-4" />, always: true },
+    { href: "/admin/portfolio", label: "Portfolio", icon: <Image className="w-4 h-4" />, feature: "portfolioGallery" },
+    { href: "/admin/menu", label: "Menu", icon: <UtensilsCrossed className="w-4 h-4" />, feature: "menuSystem" },
+    { href: "/admin/booking", label: "Booking", icon: <Calendar className="w-4 h-4" />, feature: "bookingSystem" },
+    { href: "/admin/inquiries", label: "Inquiries", icon: <MessageSquare className="w-4 h-4" />, always: true },
+    { href: "/admin/settings", label: "Settings", icon: <Settings className="w-4 h-4" />, always: true },
   ];
 
-  // Filter links based on enabled features
+  // Filter links based on enabled features - O(n) where n = number of links
   const links = allLinks.filter((link) => {
     if (link.always) return true;
     if (!enabledFeatures) return true; // Show all while loading
@@ -119,39 +126,62 @@ function AdminNav({ onLogout }: { onLogout: () => void }) {
     return true;
   });
 
+  // Get business type label for display
+  const businessTypeLabel = businessType !== "custom" ? businessType.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : null;
+
   return (
     <nav className="bg-gray-900 text-white">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link href="/admin" className="font-bold text-lg">
-            Admin
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="font-bold text-lg">
+              Admin
+            </Link>
+            {/* Business type badge - shows current template mode */}
+            {businessTypeLabel && (
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand/20 text-brand border border-brand/30">
+                {businessTypeLabel}
+              </span>
+            )}
+          </div>
 
-          <div className="hidden md:flex items-center gap-6">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={"hover:text-gray-300 " + (
-                  pathname === link.href ? "text-white font-medium" : "text-gray-400"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link href="/" className="text-gray-400 hover:text-white text-sm">
+          {/* Desktop navigation */}
+          <div className="hidden md:flex items-center gap-1">
+            {links.map((link) => {
+              const isActive = pathname === link.href || (link.href !== "/admin" && pathname.startsWith(link.href));
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    isActive
+                      ? "bg-gray-800 text-white font-medium"
+                      : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                  }`}
+                >
+                  {link.icon}
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+            <div className="w-px h-6 bg-gray-700 mx-2" />
+            <Link
+              href="/"
+              className="text-gray-400 hover:text-white text-sm px-3 py-2 rounded-lg hover:bg-gray-800/50 transition-colors"
+            >
               View Site
             </Link>
             <button
               onClick={onLogout}
-              className="text-gray-400 hover:text-white text-sm ml-2 px-3 py-1 border border-gray-600 rounded hover:border-gray-400 transition-colors"
+              className="text-gray-400 hover:text-white text-sm px-3 py-1.5 border border-gray-700 rounded-lg hover:border-gray-500 hover:bg-gray-800/50 transition-colors"
             >
               Sign Out
             </button>
           </div>
 
+          {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 text-gray-400 hover:text-white"
+            className="md:hidden p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -160,32 +190,45 @@ function AdminNav({ onLogout }: { onLogout: () => void }) {
         </div>
       </div>
 
+      {/* Mobile navigation */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-gray-800">
           <div className="px-4 py-3 space-y-1">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={"block py-2 px-3 rounded-lg " + (
-                  pathname === link.href
-                    ? "bg-gray-800 text-white font-medium"
-                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {/* Business type badge in mobile */}
+            {businessTypeLabel && (
+              <div className="px-3 py-2 mb-2">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand/20 text-brand border border-brand/30">
+                  {businessTypeLabel}
+                </span>
+              </div>
+            )}
+            {links.map((link) => {
+              const isActive = pathname === link.href || (link.href !== "/admin" && pathname.startsWith(link.href));
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center gap-3 py-3 px-3 rounded-lg ${
+                    isActive
+                      ? "bg-gray-800 text-white font-medium"
+                      : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  }`}
+                >
+                  {link.icon}
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
             <hr className="border-gray-700 my-2" />
             <Link
               href="/"
-              className="block py-2 px-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+              className="block py-3 px-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
             >
               View Site
             </Link>
             <button
               onClick={onLogout}
-              className="block w-full text-left py-2 px-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+              className="block w-full text-left py-3 px-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
             >
               Sign Out
             </button>

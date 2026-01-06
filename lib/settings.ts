@@ -1,104 +1,59 @@
 import { createFreshAdminClient, getStoreId, isBuildTime } from "@/lib/supabase";
 import { getStoreConfig } from "@/lib/store";
 
-/**
- * Business type for service businesses
- */
-export type BusinessType =
-  | "restaurant"
-  | "catering"
-  | "contractor"
-  | "salon"
-  | "professional"
-  | "cleaning"
-  | "custom";
+// Re-export types and utilities from business-types module for backward compatibility
+export {
+  type BusinessType,
+  type BusinessCategory,
+  type EnabledFeatures,
+  defaultFeatures,
+  businessCategories,
+  businessTypeInfo,
+  categoryContentPresets,
+  getBusinessTypeInfo,
+  getCategoryForType,
+  getTypesInCategory,
+  getContentPreset,
+  getFeatureDefaults,
+  hasModifiedFeatures,
+  getModifiedFeatures,
+  featureMetadata,
+  featureGroups,
+  legacyTypeMapping,
+  migrateBusinessType,
+  migrateLegacyFeatures,
+} from "./business-types";
+
+import {
+  type BusinessType,
+  type EnabledFeatures,
+  defaultFeatures,
+  getFeatureDefaults,
+  getContentPreset,
+  businessTypeInfo,
+  migrateBusinessType,
+  migrateLegacyFeatures,
+} from "./business-types";
 
 /**
- * Feature flags that can be enabled/disabled per business type
+ * Legacy business type presets for backward compatibility
+ * @deprecated Use businessTypeInfo from business-types.ts instead
  */
-export interface EnabledFeatures {
-  menuSystem: boolean;
-  bookingSystem: boolean;
-  portfolioGallery: boolean;
-  quoteRequests: boolean;
-  testimonials: boolean;
-  teamMembers: boolean;
-  faqSection: boolean;
-}
-
-/**
- * Business type presets with default feature configurations
- */
-export const businessTypePresets: Record<BusinessType, EnabledFeatures> = {
-  restaurant: {
-    menuSystem: true,
-    bookingSystem: false,
-    portfolioGallery: false,
-    quoteRequests: false,
-    testimonials: true,
-    teamMembers: false,
-    faqSection: true,
-  },
-  catering: {
-    menuSystem: true,
-    bookingSystem: true,
-    portfolioGallery: true,
-    quoteRequests: true,
-    testimonials: true,
-    teamMembers: true,
-    faqSection: true,
-  },
-  contractor: {
-    menuSystem: false,
-    bookingSystem: true,
-    portfolioGallery: true,
-    quoteRequests: true,
-    testimonials: true,
-    teamMembers: true,
-    faqSection: true,
-  },
-  salon: {
-    menuSystem: false,
-    bookingSystem: true,
-    portfolioGallery: true,
-    quoteRequests: false,
-    testimonials: true,
-    teamMembers: true,
-    faqSection: true,
-  },
-  professional: {
-    menuSystem: false,
-    bookingSystem: true,
-    portfolioGallery: false,
-    quoteRequests: false,
-    testimonials: true,
-    teamMembers: true,
-    faqSection: true,
-  },
-  cleaning: {
-    menuSystem: false,
-    bookingSystem: true,
-    portfolioGallery: true,
-    quoteRequests: true,
-    testimonials: true,
-    teamMembers: false,
-    faqSection: true,
-  },
-  custom: {
-    menuSystem: false,
-    bookingSystem: false,
-    portfolioGallery: false,
-    quoteRequests: false,
-    testimonials: false,
-    teamMembers: false,
-    faqSection: false,
-  },
+export const businessTypePresets: Record<string, EnabledFeatures> = {
+  restaurant: getFeatureDefaults("restaurant"),
+  catering: getFeatureDefaults("catering"),
+  contractor: getFeatureDefaults("general_contractor"),
+  salon: getFeatureDefaults("salon"),
+  professional: getFeatureDefaults("consultant"),
+  cleaning: getFeatureDefaults("cleaning"),
+  custom: defaultFeatures,
 };
 
 /**
- * Business type display labels
+ * Legacy business type labels for backward compatibility
+ * @deprecated Use businessTypeInfo from business-types.ts instead
  */
-export const businessTypeLabels: Record<BusinessType, string> = {
+export const businessTypeLabels: Record<string, string> = {
   restaurant: "Restaurant / Food Service",
   catering: "Catering / Events",
   contractor: "Contractor / Home Services",
@@ -177,9 +132,11 @@ export interface Testimonial {
  * Runtime store settings for services template
  */
 export interface RuntimeSettings {
-  // Business Type System
+  // Business Type System (Enhanced v9.37)
   businessType: BusinessType;
+  businessCategory?: string; // New: stores category for UI display
   enabledFeatures: EnabledFeatures;
+  featuresModified?: boolean; // Track if user customized features from defaults
 
   // Branding
   themePreset: string;
@@ -195,6 +152,15 @@ export interface RuntimeSettings {
   calendlyUrl: string;
   phoneNumber: string;
 
+  // Booking configuration (Enhanced v9.37)
+  bookingUrl: string;
+  bookingDisplayMode: 'embed' | 'popup' | 'link';
+  bookingButtonText: string;
+  bookingDescription: string;
+  showBookingOnHero: boolean;
+  showBookingOnServicePages: boolean;
+  showBookingPage: boolean;
+
   // Section toggles
   showProcess: boolean;
   showStats: boolean;
@@ -207,6 +173,7 @@ export interface RuntimeSettings {
   showAdditionalServices: boolean;
   showBadges: boolean;
   showMapEmbed: boolean;
+  showEmergencyBanner: boolean; // New: linked to emergencyServices feature
 
   // Process steps (How It Works)
   process: ProcessStep[];
@@ -275,13 +242,19 @@ export interface RuntimeSettings {
 
 /**
  * Default settings from environment variables
+ * Uses content presets from business-types module
  */
 function getDefaultSettings(): RuntimeSettings {
   const config = getStoreConfig();
+  const defaultType: BusinessType = "custom";
+  const contentPreset = getContentPreset(defaultType);
+
   return {
-    // Business Type System
-    businessType: "custom" as BusinessType,
-    enabledFeatures: businessTypePresets.custom,
+    // Business Type System (Enhanced v9.37)
+    businessType: defaultType,
+    businessCategory: undefined,
+    enabledFeatures: defaultFeatures,
+    featuresModified: false,
 
     // Branding
     themePreset: config.themePreset || "default",
@@ -295,6 +268,15 @@ function getDefaultSettings(): RuntimeSettings {
     calendlyUrl: "",
     phoneNumber: config.contactPhone || "",
 
+    // Booking configuration (Enhanced v9.37)
+    bookingUrl: "",
+    bookingDisplayMode: 'embed',
+    bookingButtonText: "Book Now",
+    bookingDescription: "Schedule your appointment online",
+    showBookingOnHero: false,
+    showBookingOnServicePages: false,
+    showBookingPage: true,
+
     // Section defaults
     showProcess: true,
     showStats: true,
@@ -307,6 +289,7 @@ function getDefaultSettings(): RuntimeSettings {
     showAdditionalServices: false,
     showBadges: true,
     showMapEmbed: false,
+    showEmergencyBanner: contentPreset.emergencyBannerEnabled,
 
     // Process steps
     process: [
@@ -394,6 +377,7 @@ function getDefaultSettings(): RuntimeSettings {
 /**
  * Fetches all runtime settings from the database.
  * Falls back to environment variables if database is unavailable.
+ * Includes migration logic for legacy 7-type business type system.
  */
 export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
   const defaults = getDefaultSettings();
@@ -419,11 +403,30 @@ export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
 
     if (data?.settings) {
       const s = data.settings;
+
+      // Migration: Convert legacy business type to new system
+      let businessType = s.businessType || defaults.businessType;
+      let enabledFeatures = s.enabledFeatures || defaults.enabledFeatures;
+
+      // Check if this is a legacy 7-type business type (restaurant, catering, contractor, salon, professional, cleaning, custom)
+      const legacyTypes = ["restaurant", "catering", "contractor", "salon", "professional", "cleaning", "custom"];
+      if (legacyTypes.includes(businessType) && !businessTypeInfo[businessType as BusinessType]) {
+        // Migrate to new type system
+        businessType = migrateBusinessType(businessType);
+      }
+
+      // Migrate legacy 7-feature system to new 14-feature system
+      if (enabledFeatures && !("emergencyServices" in enabledFeatures)) {
+        enabledFeatures = migrateLegacyFeatures(enabledFeatures);
+      }
+
       // Merge database settings with defaults (DB takes precedence)
       return {
-        // Business Type System
-        businessType: s.businessType || defaults.businessType,
-        enabledFeatures: s.enabledFeatures || defaults.enabledFeatures,
+        // Business Type System (Enhanced v9.37)
+        businessType: businessType as BusinessType,
+        businessCategory: s.businessCategory,
+        enabledFeatures,
+        featuresModified: s.featuresModified ?? false,
 
         // Branding
         themePreset: s.themePreset || defaults.themePreset,
@@ -437,6 +440,15 @@ export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
         calendlyUrl: s.calendlyUrl ?? defaults.calendlyUrl,
         phoneNumber: s.phoneNumber ?? defaults.phoneNumber,
 
+        // Booking configuration (Enhanced v9.37)
+        bookingUrl: s.bookingUrl ?? defaults.bookingUrl,
+        bookingDisplayMode: s.bookingDisplayMode || defaults.bookingDisplayMode,
+        bookingButtonText: s.bookingButtonText ?? defaults.bookingButtonText,
+        bookingDescription: s.bookingDescription ?? defaults.bookingDescription,
+        showBookingOnHero: s.showBookingOnHero ?? defaults.showBookingOnHero,
+        showBookingOnServicePages: s.showBookingOnServicePages ?? defaults.showBookingOnServicePages,
+        showBookingPage: s.showBookingPage ?? defaults.showBookingPage,
+
         // Section toggles
         showProcess: s.showProcess ?? defaults.showProcess,
         showStats: s.showStats ?? defaults.showStats,
@@ -449,6 +461,7 @@ export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
         showAdditionalServices: s.showAdditionalServices ?? defaults.showAdditionalServices,
         showBadges: s.showBadges ?? defaults.showBadges,
         showMapEmbed: s.showMapEmbed ?? defaults.showMapEmbed,
+        showEmergencyBanner: s.showEmergencyBanner ?? s.emergencyBannerEnabled ?? defaults.showEmergencyBanner,
 
         // Process steps
         process: s.process || defaults.process,
@@ -520,4 +533,49 @@ export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
   }
 
   return defaults;
+}
+
+/**
+ * Apply content presets from a business type to settings
+ * Used when user selects a new business type
+ */
+export function applyBusinessTypePresets(
+  currentSettings: Partial<RuntimeSettings>,
+  type: BusinessType,
+  applyContentDefaults: boolean = true
+): Partial<RuntimeSettings> {
+  const info = businessTypeInfo[type];
+  if (!info) return currentSettings;
+
+  const contentPreset = getContentPreset(type);
+  const updatedSettings: Partial<RuntimeSettings> = {
+    ...currentSettings,
+    businessType: type,
+    businessCategory: info.category,
+    enabledFeatures: info.features,
+    featuresModified: false,
+  };
+
+  // Optionally apply content defaults (hero text, badges, process steps)
+  if (applyContentDefaults) {
+    updatedSettings.heroHeading = contentPreset.heroHeading;
+    updatedSettings.heroHeadingAccent = contentPreset.heroHeadingAccent;
+    updatedSettings.heroSubheading = contentPreset.heroSubheading;
+    updatedSettings.heroBadgeText = contentPreset.heroBadgeText;
+    updatedSettings.heroCTAText = contentPreset.heroCTAText;
+    updatedSettings.heroSecondaryCTAText = contentPreset.heroSecondaryCTAText;
+    updatedSettings.trustBadges = contentPreset.trustBadges;
+    updatedSettings.process = contentPreset.processSteps;
+    updatedSettings.processTitle = contentPreset.processTitle;
+    updatedSettings.processSubtitle = contentPreset.processSubtitle;
+    updatedSettings.processCTAText = contentPreset.processCTAText;
+    updatedSettings.whyChooseUsTitle = contentPreset.whyChooseUsTitle;
+    updatedSettings.whyChooseUsHeading = contentPreset.whyChooseUsHeading;
+    updatedSettings.whyChooseUsText = contentPreset.whyChooseUsText;
+    updatedSettings.emergencyBannerText = contentPreset.emergencyBannerText;
+    updatedSettings.emergencyBannerEnabled = contentPreset.emergencyBannerEnabled;
+    updatedSettings.showEmergencyBanner = contentPreset.emergencyBannerEnabled;
+  }
+
+  return updatedSettings;
 }

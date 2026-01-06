@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Save, Plus, X, GripVertical, Star, Lock, Check, Sparkles, ExternalLink, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Save, Plus, X, GripVertical, Star, Lock, Check, Sparkles, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { allThemes } from "@/lib/themes";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
+import { BusinessTypeSelector } from "@/components/BusinessTypeSelector";
 import type {
   ProcessStep,
   StatItem,
@@ -11,15 +12,19 @@ import type {
   SpecialtyItem,
   CommitmentBadge,
   Testimonial,
-  BusinessType,
-  EnabledFeatures,
 } from "@/lib/settings";
-import { businessTypePresets, businessTypeLabels } from "@/lib/settings";
+import {
+  type BusinessType,
+  type EnabledFeatures,
+  getFeatureDefaults,
+  getContentPreset,
+} from "@/lib/business-types";
 
 interface Settings {
-  // Business Type System
+  // Business Type System (Enhanced v9.37)
   businessType: BusinessType;
   enabledFeatures: EnabledFeatures;
+  featuresModified?: boolean;
 
   // General
   tagline: string;
@@ -109,7 +114,8 @@ interface Settings {
 
 const defaultSettings: Settings = {
   businessType: "custom",
-  enabledFeatures: businessTypePresets.custom,
+  enabledFeatures: getFeatureDefaults("custom"),
+  featuresModified: false,
   tagline: "",
   aboutText: "",
   businessHours: "Mon-Fri 9am-5pm",
@@ -397,6 +403,55 @@ export default function SettingsPage() {
     }));
   }
 
+  /**
+   * Business Type Handlers (Enhanced v9.37)
+   *
+   * These handlers integrate with the BusinessTypeSelector component to:
+   * - Change business type and optionally apply content presets
+   * - Toggle individual features while tracking modifications
+   * - Reset features to business type defaults
+   *
+   * Performance: O(1) for type lookup, O(n) for feature comparison where n = feature count
+   */
+  const handleBusinessTypeChange = useCallback((type: BusinessType, applyContentDefaults?: boolean) => {
+    const newFeatures = getFeatureDefaults(type);
+    const contentPreset = applyContentDefaults ? getContentPreset(type) : null;
+
+    setSettings((prev) => ({
+      ...prev,
+      businessType: type,
+      enabledFeatures: newFeatures,
+      featuresModified: false,
+      // Apply content presets if requested
+      ...(contentPreset && {
+        heroHeading: contentPreset.heroHeading,
+        heroHeadingAccent: contentPreset.heroHeadingAccent,
+        heroCTAText: contentPreset.heroCTAText,
+        processTitle: contentPreset.processTitle,
+        processSubtitle: contentPreset.processSubtitle,
+        processCTAText: contentPreset.processCTAText,
+        trustBadges: contentPreset.trustBadges,
+        process: contentPreset.processSteps,
+      }),
+    }));
+  }, []);
+
+  const handleFeatureChange = useCallback((features: EnabledFeatures) => {
+    setSettings((prev) => ({
+      ...prev,
+      enabledFeatures: features,
+      featuresModified: true,
+    }));
+  }, []);
+
+  const handleResetToDefaults = useCallback(() => {
+    setSettings((prev) => ({
+      ...prev,
+      enabledFeatures: getFeatureDefaults(prev.businessType),
+      featuresModified: false,
+    }));
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -455,119 +510,15 @@ export default function SettingsPage() {
       {/* General Tab */}
       {activeTab === "general" && (
         <div className="space-y-6">
-          {/* Business Type Section */}
+          {/* Business Type Section - Enhanced v9.37 */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-1">Business Type</h3>
-              <p className="text-sm text-gray-500">
-                Select your business type to get recommended feature defaults. You can customize individual features below.
-              </p>
-            </div>
-
-            {/* Business Type Selector */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-              {(Object.keys(businessTypeLabels) as BusinessType[]).map((type) => {
-                const isSelected = settings.businessType === type;
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => {
-                      setSettings((prev) => ({
-                        ...prev,
-                        businessType: type,
-                        enabledFeatures: businessTypePresets[type],
-                      }));
-                    }}
-                    className={`p-3 rounded-lg border-2 text-left transition-all ${
-                      isSelected
-                        ? "border-brand bg-brand/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <span className={`text-sm font-medium ${isSelected ? "text-brand" : "text-gray-700"}`}>
-                      {businessTypeLabels[type]}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Feature Toggles */}
-            <div className="border-t pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">Enabled Features</h4>
-                  <p className="text-xs text-gray-500">Toggle which features are available for your business</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSettings((prev) => ({
-                      ...prev,
-                      enabledFeatures: businessTypePresets[prev.businessType],
-                    }));
-                  }}
-                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Reset to Defaults
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { key: "menuSystem", label: "Menu System", description: "Food/drink menus for restaurants" },
-                  { key: "bookingSystem", label: "Booking System", description: "Appointment scheduling" },
-                  { key: "portfolioGallery", label: "Portfolio Gallery", description: "Before/after photos, project showcases" },
-                  { key: "quoteRequests", label: "Quote Requests", description: "Request a quote forms" },
-                  { key: "testimonials", label: "Testimonials", description: "Customer reviews and ratings" },
-                  { key: "teamMembers", label: "Team Members", description: "Staff profiles and bios" },
-                  { key: "faqSection", label: "FAQ Section", description: "Frequently asked questions" },
-                ].map((feature) => {
-                  const isEnabled = settings.enabledFeatures[feature.key as keyof EnabledFeatures];
-                  const presetValue = businessTypePresets[settings.businessType][feature.key as keyof EnabledFeatures];
-                  const isDifferent = isEnabled !== presetValue;
-
-                  return (
-                    <label
-                      key={feature.key}
-                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        isEnabled
-                          ? "border-brand/30 bg-brand/5"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isEnabled}
-                        onChange={(e) => {
-                          setSettings((prev) => ({
-                            ...prev,
-                            enabledFeatures: {
-                              ...prev.enabledFeatures,
-                              [feature.key]: e.target.checked,
-                            },
-                          }));
-                        }}
-                        className="w-5 h-5 mt-0.5 text-brand focus:ring-brand rounded"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-900">{feature.label}</span>
-                          {isDifferent && (
-                            <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded">
-                              Modified
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500">{feature.description}</p>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
+            <BusinessTypeSelector
+              selectedType={settings.businessType}
+              enabledFeatures={settings.enabledFeatures}
+              onTypeChange={handleBusinessTypeChange}
+              onFeatureChange={handleFeatureChange}
+              onResetToDefaults={handleResetToDefaults}
+            />
           </div>
 
           {/* General Settings */}
