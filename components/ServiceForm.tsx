@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Trash2, X, Plus, ExternalLink } from "lucide-react";
+import { AIEnhanceButton } from "./AIEnhanceButton";
 import type { Service, PortfolioImage } from "@/data/services";
 import { IconPicker } from "./IconPicker";
 import { MultiImageUpload } from "./MultiImageUpload";
@@ -198,6 +199,15 @@ export function ServiceForm({ service, isNew = false }: ServiceFormProps) {
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
               placeholder="Detailed description of the service"
             />
+            <div className="flex justify-end mt-2">
+              <AIEnhanceButton
+                contentType="service"
+                contextName={formData.name}
+                currentText={formData.description}
+                onEnhanced={(text) => setFormData((prev) => ({ ...prev, description: text }))}
+                disabled={saving}
+              />
+            </div>
           </div>
         </div>
       </div>
