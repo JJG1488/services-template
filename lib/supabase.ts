@@ -24,6 +24,7 @@ export function getSupabase(): SupabaseClient | null {
 }
 
 // Admin client for privileged operations (uses service role key, bypasses RLS)
+// CACHED - Use createFreshAdminClient() when stale data is a concern
 export function getSupabaseAdmin(): SupabaseClient | null {
   if (isBuildTime()) {
     return null as unknown as SupabaseClient;
@@ -32,11 +33,18 @@ export function getSupabaseAdmin(): SupabaseClient | null {
   if (!supabaseAdminInstance) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    // Require service role key for admin operations - do NOT fall back to anon key
+    // as this causes silent RLS failures that are hard to debug
     if (!serviceRoleKey) {
-      console.warn("WARNING: SUPABASE_SERVICE_ROLE_KEY not set - admin operations may fail");
+      console.error(
+        "[Supabase] CRITICAL: SUPABASE_SERVICE_ROLE_KEY not configured. " +
+        "Admin operations (services, settings) will fail. " +
+        "Please set this environment variable in your deployment."
+      );
+      return null;
     }
-    const key = serviceRoleKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    supabaseAdminInstance = createClient(supabaseUrl, key);
+    supabaseAdminInstance = createClient(supabaseUrl, serviceRoleKey);
   }
   return supabaseAdminInstance;
 }
@@ -45,16 +53,31 @@ export function getStoreId(): string {
   return process.env.NEXT_PUBLIC_STORE_ID || "";
 }
 
-// Create a fresh admin client (no caching)
+/**
+ * Create a fresh admin client (no caching)
+ * Use when stale data is a problem - settings, services, portfolio items
+ *
+ * This bypasses Supabase PostgREST caching by:
+ * 1. Creating a new client instance (no singleton)
+ * 2. Setting cache: 'no-store' on fetch requests
+ * 3. Adding Cache-Control headers to prevent HTTP caching
+ */
 export function createFreshAdminClient(): SupabaseClient | null {
   if (isBuildTime()) {
     return null;
   }
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const key = serviceRoleKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  return createClient(supabaseUrl, key, {
+  // Require service role key - do NOT fall back to anon key
+  if (!serviceRoleKey) {
+    console.error(
+      "[Supabase] CRITICAL: SUPABASE_SERVICE_ROLE_KEY not configured for fresh admin client."
+    );
+    return null;
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
     global: {
       fetch: (url, options = {}) => {
         const existingHeaders = options.headers instanceof Headers

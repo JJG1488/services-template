@@ -84,15 +84,15 @@ export async function getServices(): Promise<Service[]> {
   return data || [];
 }
 
+/**
+ * Get active services for public display
+ * Uses createFreshAdminClient() to ensure admin changes reflect immediately
+ */
 export async function getActiveServices(): Promise<Service[]> {
   const supabase = createFreshAdminClient();
   const storeId = getStoreId();
 
-  console.log("[getActiveServices] storeId:", storeId);
-  console.log("[getActiveServices] supabase:", !!supabase);
-
   if (!supabase || !storeId) {
-    console.log("[getActiveServices] Missing supabase or storeId, returning []");
     return [];
   }
 
@@ -102,8 +102,6 @@ export async function getActiveServices(): Promise<Service[]> {
     .eq("store_id", storeId)
     .eq("is_active", true)
     .order("display_order", { ascending: true });
-
-  console.log("[getActiveServices] data count:", data?.length, "error:", error);
 
   if (error) {
     console.error("Error fetching active services:", error);
