@@ -1,19 +1,31 @@
 // Theme presets for services template
 // Inspired by the reference Pointer Roofing project (gold accent)
 
+import { generateBrandVariants } from "./colors";
+
+export interface ThemeColors {
+  brand: string;
+  brandDark: string;
+  bgPrimary: string;
+  bgSecondary: string;
+  bgDark: string;
+  textPrimary: string;
+  textSecondary: string;
+}
+
+export interface DarkModeColors {
+  bgPrimary: string;
+  bgSecondary: string;
+  textPrimary: string;
+  textSecondary: string;
+}
+
 export interface Theme {
   id: string;
   name: string;
   description: string;
-  colors: {
-    brand: string;
-    brandDark: string;
-    bgPrimary: string;
-    bgSecondary: string;
-    bgDark: string;
-    textPrimary: string;
-    textSecondary: string;
-  };
+  colors: ThemeColors;
+  dark: DarkModeColors;
   preview: {
     primary: string;
     accent: string;
@@ -36,6 +48,12 @@ export const themes: Theme[] = [
       textPrimary: "#111827",
       textSecondary: "#4b5563",
     },
+    dark: {
+      bgPrimary: "#111827",
+      bgSecondary: "#1f2937",
+      textPrimary: "#f9fafb",
+      textSecondary: "#d1d5db",
+    },
     preview: {
       primary: "#FFD700",
       accent: "#e6c200",
@@ -55,6 +73,12 @@ export const themes: Theme[] = [
       bgDark: "#0f172a",
       textPrimary: "#0f172a",
       textSecondary: "#475569",
+    },
+    dark: {
+      bgPrimary: "#0f172a",
+      bgSecondary: "#1e293b",
+      textPrimary: "#f8fafc",
+      textSecondary: "#cbd5e1",
     },
     preview: {
       primary: "#3b82f6",
@@ -76,6 +100,12 @@ export const themes: Theme[] = [
       textPrimary: "#064e3b",
       textSecondary: "#047857",
     },
+    dark: {
+      bgPrimary: "#064e3b",
+      bgSecondary: "#065f46",
+      textPrimary: "#f0fdf4",
+      textSecondary: "#a7f3d0",
+    },
     preview: {
       primary: "#10b981",
       accent: "#059669",
@@ -95,6 +125,12 @@ export const themes: Theme[] = [
       bgDark: "#7c2d12",
       textPrimary: "#1c1917",
       textSecondary: "#57534e",
+    },
+    dark: {
+      bgPrimary: "#7c2d12",
+      bgSecondary: "#9a3412",
+      textPrimary: "#fff7ed",
+      textSecondary: "#fed7aa",
     },
     preview: {
       primary: "#f97316",
@@ -116,6 +152,12 @@ export const themes: Theme[] = [
       textPrimary: "#1e1b4b",
       textSecondary: "#4338ca",
     },
+    dark: {
+      bgPrimary: "#2e1065",
+      bgSecondary: "#3b0764",
+      textPrimary: "#faf5ff",
+      textSecondary: "#e9d5ff",
+    },
     preview: {
       primary: "#8b5cf6",
       accent: "#7c3aed",
@@ -136,6 +178,12 @@ export const themes: Theme[] = [
       textPrimary: "#0f172a",
       textSecondary: "#0f766e",
     },
+    dark: {
+      bgPrimary: "#134e4a",
+      bgSecondary: "#115e59",
+      textPrimary: "#f0fdfa",
+      textSecondary: "#99f6e4",
+    },
     preview: {
       primary: "#14b8a6",
       accent: "#0d9488",
@@ -152,18 +200,31 @@ export function getThemeById(themeId: string): Theme {
   return themes.find((t) => t.id === themeId) || themes[0];
 }
 
-export function generateThemeCSS(theme: Theme): string {
+export function generateThemeCSS(theme: Theme, isDarkMode = false): string {
+  // Generate brand color variants for hover/active states
+  const brandVariants = generateBrandVariants(theme.colors.brand);
+  const { colors, dark } = theme;
+
+  // Use dark mode colors for bg and text if enabled
+  const bgPrimary = isDarkMode ? dark.bgPrimary : colors.bgPrimary;
+  const bgSecondary = isDarkMode ? dark.bgSecondary : colors.bgSecondary;
+  const textPrimary = isDarkMode ? dark.textPrimary : colors.textPrimary;
+  const textSecondary = isDarkMode ? dark.textSecondary : colors.textSecondary;
+
   return `
     :root {
-      --brand-color: ${theme.colors.brand};
-      --brand-color-dark: ${theme.colors.brandDark};
-      --brand-color-10: ${theme.colors.brand}1a;
-      --brand-color-20: ${theme.colors.brand}33;
-      --bg-primary: ${theme.colors.bgPrimary};
-      --bg-secondary: ${theme.colors.bgSecondary};
-      --bg-dark: ${theme.colors.bgDark};
-      --text-primary: ${theme.colors.textPrimary};
-      --text-secondary: ${theme.colors.textSecondary};
+      --brand-color: ${colors.brand};
+      --brand-color-dark: ${colors.brandDark};
+      --brand-hover: ${brandVariants.hover};
+      --brand-active: ${brandVariants.active};
+      --brand-light: ${brandVariants.light};
+      --brand-color-10: ${colors.brand}1a;
+      --brand-color-20: ${colors.brand}33;
+      --bg-primary: ${bgPrimary};
+      --bg-secondary: ${bgSecondary};
+      --bg-dark: ${colors.bgDark};
+      --text-primary: ${textPrimary};
+      --text-secondary: ${textSecondary};
     }
   `;
 }

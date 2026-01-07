@@ -7,8 +7,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        brand: "var(--brand-color, #FFD700)",
-        "brand-dark": "var(--brand-color-dark, #e6c200)",
+        brand: {
+          DEFAULT: "var(--brand-color, #FFD700)",
+          dark: "var(--brand-color-dark, #e6c200)",
+          hover: "var(--brand-hover, #e6c200)",
+          active: "var(--brand-active, #ccad00)",
+          light: "var(--brand-light, #ffe44d)",
+        },
       },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out",

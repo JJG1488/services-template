@@ -6,6 +6,10 @@
   /* Primary brand color - gold accent (from reference) */
   --brand-color: #FFD700;
   --brand-color-dark: #e6c200;
+  /* Brand hover/active variants (auto-generated from primary) */
+  --brand-hover: #e6c200;
+  --brand-active: #ccad00;
+  --brand-light: #ffe44d;
   --brand-color-10: rgba(255, 215, 0, 0.1);
   --brand-color-20: rgba(255, 215, 0, 0.2);
 
@@ -29,6 +33,19 @@
   --footer-bg: #111827;
   --footer-text: #ffffff;
   --footer-text-muted: #9ca3af;
+
+  /* Font families (set by font presets) */
+  --font-heading: system-ui, -apple-system, sans-serif;
+  --font-body: system-ui, -apple-system, sans-serif;
+}
+
+/* Apply font families */
+body {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
 }
 
 /* Utility class for text shadow on hero sections */

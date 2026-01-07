@@ -4,6 +4,7 @@ import "./globals.css";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
 import { getStoreConfig } from "@/lib/store";
 import { getThemeById, generateThemeCSS } from "@/lib/themes";
+import { getFontById, generateFontCSS } from "@/lib/fonts";
 import { getStoreSettingsFromDB } from "@/lib/settings";
 
 // Force dynamic rendering so settings changes appear for all visitors
@@ -27,7 +28,9 @@ export default async function RootLayout({
   const store = getStoreConfig();
   const settings = await getStoreSettingsFromDB();
   const theme = getThemeById(settings.themePreset);
-  const themeCSS = generateThemeCSS(theme);
+  const themeCSS = generateThemeCSS(theme, settings.darkModeEnabled);
+  const font = getFontById(settings.fontPreset);
+  const fontCSS = generateFontCSS(font);
 
   // Override brand color with admin-configurable setting
   // Falls back to wizard-selected color if not set in admin panel
@@ -38,9 +41,13 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Load Google Fonts if using a custom font preset */}
+        {font.googleFontsUrl && (
+          <link href={font.googleFontsUrl} rel="stylesheet" />
+        )}
         <style
           dangerouslySetInnerHTML={{
-            __html: themeCSS + brandColorOverride,
+            __html: themeCSS + fontCSS + brandColorOverride,
           }}
         />
       </head>

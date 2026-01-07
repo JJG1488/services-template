@@ -140,6 +140,8 @@ export interface RuntimeSettings {
 
   // Branding
   themePreset: string;
+  fontPreset: string;
+  darkModeEnabled: boolean;
   brandColor: string; // Admin-configurable brand color (hex)
   logoUrl: string;
 
@@ -258,6 +260,8 @@ function getDefaultSettings(): RuntimeSettings {
 
     // Branding
     themePreset: config.themePreset || "default",
+    fontPreset: "default",
+    darkModeEnabled: false,
     brandColor: config.primaryColor || "#FFD700",
     logoUrl: config.logoUrl || "",
     tagline: config.tagline || "",
@@ -430,6 +434,8 @@ export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
 
         // Branding
         themePreset: s.themePreset || defaults.themePreset,
+        fontPreset: s.fontPreset || defaults.fontPreset,
+        darkModeEnabled: s.darkModeEnabled ?? defaults.darkModeEnabled,
         brandColor: s.brandColor || defaults.brandColor,
         logoUrl: s.logoUrl || defaults.logoUrl,
         tagline: s.tagline ?? defaults.tagline,
