@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, LayoutDashboard, Briefcase, Image, UtensilsCrossed, MessageSquare, Settings, Calendar } from "lucide-react";
+import { Menu, X, LayoutDashboard, Briefcase, Image, UtensilsCrossed, MessageSquare, Settings, Calendar, HelpCircle } from "lucide-react";
 import { AdminContext } from "@/lib/admin-context";
 import type { EnabledFeatures } from "@/lib/business-types";
 
@@ -107,7 +107,7 @@ function AdminNav({ onLogout }: { onLogout: () => void }) {
     fetchSettings();
   }, []);
 
-  // All possible nav links with feature requirements (Enhanced v9.37)
+  // All possible nav links with feature requirements (Enhanced v9.37, v9.44)
   const allLinks: NavLink[] = [
     { href: "/admin", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" />, always: true },
     { href: "/admin/services", label: "Services", icon: <Briefcase className="w-4 h-4" />, always: true },
@@ -115,6 +115,7 @@ function AdminNav({ onLogout }: { onLogout: () => void }) {
     { href: "/admin/menu", label: "Menu", icon: <UtensilsCrossed className="w-4 h-4" />, feature: "menuSystem" },
     { href: "/admin/booking", label: "Booking", icon: <Calendar className="w-4 h-4" />, feature: "bookingSystem" },
     { href: "/admin/inquiries", label: "Inquiries", icon: <MessageSquare className="w-4 h-4" />, always: true },
+    { href: "/admin/faq", label: "FAQ", icon: <HelpCircle className="w-4 h-4" />, always: true },
     { href: "/admin/settings", label: "Settings", icon: <Settings className="w-4 h-4" />, always: true },
   ];
 

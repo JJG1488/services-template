@@ -129,6 +129,15 @@ export interface Testimonial {
 }
 
 /**
+ * FAQ item for the FAQ section
+ */
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+/**
  * Runtime store settings for services template
  */
 export interface RuntimeSettings {
@@ -225,6 +234,11 @@ export interface RuntimeSettings {
   reviewCount: number;
   googleReviewsUrl: string;
   testimonials: Testimonial[];
+
+  // FAQ section
+  faqTitle: string;
+  faqSubtitle: string;
+  faqs: FAQItem[];
 
   // Footer
   mapEmbedUrl: string;
@@ -360,6 +374,19 @@ function getDefaultSettings(): RuntimeSettings {
     reviewCount: 0,
     googleReviewsUrl: "",
     testimonials: [],
+
+    // FAQ
+    faqTitle: "Frequently Asked Questions",
+    faqSubtitle: "Find answers to common questions about our services.",
+    faqs: [
+      { id: "1", question: "How do I schedule an appointment or service?", answer: "You can schedule a service by contacting us through our Contact page, calling us during business hours, or using our online booking system if available. We'll work with you to find a convenient time that fits your schedule." },
+      { id: "2", question: "What is your cancellation policy?", answer: "We ask that you provide at least 24 hours notice if you need to cancel or reschedule your appointment. Late cancellations or no-shows may be subject to a cancellation fee." },
+      { id: "3", question: "Do you offer free estimates?", answer: "Yes, we provide free estimates for most services. Contact us with details about your project, and we'll give you a clear quote before any work begins." },
+      { id: "4", question: "What areas do you serve?", answer: "We serve the local area and surrounding communities. Check our service areas section or contact us to confirm we can service your location." },
+      { id: "5", question: "What payment methods do you accept?", answer: "We accept all major credit cards (Visa, Mastercard, American Express), debit cards, and other payment methods shown at checkout." },
+      { id: "6", question: "Are you licensed and insured?", answer: "Yes, we maintain all required licenses and carry appropriate insurance for the services we provide. We're happy to provide proof upon request." },
+      { id: "7", question: "What if I'm not satisfied with the service?", answer: "Your satisfaction is our priority. If you're not happy with our work, please contact us within 48 hours of service completion and we'll work to address any concerns." },
+    ],
 
     // Footer
     mapEmbedUrl: "",
@@ -517,6 +544,11 @@ export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
         reviewCount: s.reviewCount ?? defaults.reviewCount,
         googleReviewsUrl: s.googleReviewsUrl ?? defaults.googleReviewsUrl,
         testimonials: s.testimonials || defaults.testimonials,
+
+        // FAQ
+        faqTitle: s.faqTitle ?? defaults.faqTitle,
+        faqSubtitle: s.faqSubtitle ?? defaults.faqSubtitle,
+        faqs: s.faqs || defaults.faqs,
 
         // Footer
         mapEmbedUrl: s.mapEmbedUrl ?? defaults.mapEmbedUrl,

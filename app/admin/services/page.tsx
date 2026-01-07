@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Edit, ToggleLeft, ToggleRight, Star, GripVertical } from "lucide-react";
+import { Plus, Edit, ToggleLeft, ToggleRight, Star, GripVertical, Sparkles } from "lucide-react";
 import { getServices } from "@/data/services";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +29,7 @@ export default async function ServicesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Services</h1>
         <Link
           href="/admin/services/new"
@@ -37,6 +37,17 @@ export default async function ServicesPage() {
         >
           <Plus className="w-5 h-5" />
           Add Service
+        </Link>
+      </div>
+
+      {/* Secondary Actions */}
+      <div className="flex items-center gap-3 mb-8">
+        <Link
+          href="/admin/additional-services"
+          className="flex items-center gap-2 bg-gray-100 text-gray-700 font-medium px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <Sparkles className="w-5 h-5" />
+          Manage Additional Services
         </Link>
       </div>
 
