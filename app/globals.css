@@ -365,6 +365,7 @@ input:focus, textarea:focus, select:focus {
   margin-top: 4px !important;
   padding-top: 12px !important;
   border-top: 1px solid var(--border-light) !important;
+  flex-direction: row !important;
 }
 
 /* Base button styles */
@@ -378,11 +379,12 @@ input:focus, textarea:focus, select:focus {
   min-width: 70px !important;
 }
 
-/* Previous button - secondary style */
+/* Previous button - secondary style (order 1 = left side) */
 .driver-popover-prev-btn {
   background-color: transparent !important;
   color: var(--text-secondary) !important;
   border: 1px solid var(--border-color) !important;
+  order: 1 !important;
 }
 
 .driver-popover-prev-btn:hover {
@@ -390,12 +392,13 @@ input:focus, textarea:focus, select:focus {
   border-color: var(--border-color) !important;
 }
 
-/* Next/Done button - brand color style */
+/* Next/Done button - brand color style (order 2 = right side) */
 .driver-popover-next-btn {
   background-color: var(--brand-color) !important;
   color: #1a1a1a !important;
   border: none !important;
   font-weight: 600 !important;
+  order: 2 !important;
 }
 
 .driver-popover-next-btn:hover {
@@ -436,8 +439,9 @@ input:focus, textarea:focus, select:focus {
 /* Mobile responsiveness */
 @media (max-width: 640px) {
   .driver-popover {
-    max-width: calc(100vw - 32px) !important;
-    margin: 0 16px !important;
+    max-width: calc(100vw - 48px) !important;
+    margin: 0 24px !important;
+    padding: 16px !important;
   }
 
   .driver-popover-title {
@@ -447,22 +451,26 @@ input:focus, textarea:focus, select:focus {
 
   .driver-popover-description {
     font-size: 0.875rem !important;
+    margin-bottom: 12px !important;
   }
 
   .driver-popover-footer {
-    flex-direction: column !important;
+    flex-direction: row !important;
+    gap: 8px !important;
   }
 
   .driver-popover-footer button {
-    width: 100% !important;
+    flex: 1 !important;
     justify-content: center !important;
+    padding: 10px 12px !important;
   }
 
+  /* Keep same order on mobile: Back left, Next/Finish right */
   .driver-popover-prev-btn {
-    order: 2 !important;
+    order: 1 !important;
   }
 
   .driver-popover-next-btn {
-    order: 1 !important;
+    order: 2 !important;
   }
 }

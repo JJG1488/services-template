@@ -152,7 +152,17 @@ export function useTour(): UseTourReturn {
     const driverInstance = driver({
       ...tourDriverConfig,
       steps: filteredSteps,
+      onCloseClick: () => {
+        // Mark tour as complete when user clicks X or outside
+        setTourData(true);
+        setHasCompletedTour(true);
+        setIsTourActive(false);
+        driverInstance.destroy();
+      },
       onDestroyStarted: () => {
+        // Mark tour as complete when finishing
+        setTourData(true);
+        setHasCompletedTour(true);
         setIsTourActive(false);
       },
       onDestroyed: () => {
