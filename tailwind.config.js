@@ -7,13 +7,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Enhanced v9.45: Deeper jewel tones with improved contrast
         brand: {
-          DEFAULT: "var(--brand-color, #FFD700)",
-          dark: "var(--brand-color-dark, #e6c200)",
-          hover: "var(--brand-hover, #e6c200)",
-          active: "var(--brand-active, #ccad00)",
-          light: "var(--brand-light, #ffe44d)",
+          DEFAULT: "var(--brand-color, #F5C400)",      // Rich gold (was #FFD700)
+          dark: "var(--brand-color-dark, #d4a900)",    // Deeper gold
+          hover: "var(--brand-hover, #d4a900)",
+          active: "var(--brand-active, #b89200)",
+          light: "var(--brand-light, #fcd34d)",
         },
+      },
+      fontWeight: {
+        heading: "var(--font-weight-heading, 600)",
       },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out",
