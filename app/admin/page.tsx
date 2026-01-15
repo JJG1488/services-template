@@ -74,7 +74,10 @@ export default async function AdminDashboard() {
       <h1 className="text-2xl font-bold mb-8">Dashboard</h1>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div
+        data-tour="dashboard-stats"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+      >
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <p className="text-gray-500 text-sm">Total Services</p>
           <p className="text-3xl font-bold text-gray-900">{stats.services}</p>
