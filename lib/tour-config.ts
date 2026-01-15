@@ -21,7 +21,7 @@ export interface TourStep extends DriveStep {
 
 /**
  * Tour steps for the services admin dashboard
- * Steps are ordered to guide users through the most important features first
+ * All steps use centered positioning for a consistent, fixed-location experience
  */
 export const servicesTourSteps: TourStep[] = [
   {
@@ -34,106 +34,96 @@ export const servicesTourSteps: TourStep[] = [
     },
   },
   {
-    id: "dashboard-stats",
-    element: "[data-tour='dashboard-stats']",
+    id: "dashboard",
     popover: {
       title: "Dashboard Overview",
-      description: "View your key metrics at a glance - total services, recent inquiries, and more. Click any card to see more details.",
-      side: "bottom" as const,
+      description: "Your dashboard shows key metrics at a glance - total services, recent inquiries, and more. Click any card to see more details.",
+      side: "over" as const,
       align: "center" as const,
     },
   },
   {
     id: "services",
-    element: "[data-tour='nav-services']",
     popover: {
       title: "Services Management",
-      description: "Add, edit, and manage your service offerings. Set prices, descriptions, and durations. This is where you showcase what you offer.",
-      side: "bottom" as const,
-      align: "start" as const,
+      description: "In the 'Services' section, you can add, edit, and manage your service offerings. Set prices, descriptions, and durations to showcase what you offer.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {
     id: "portfolio",
-    element: "[data-tour='nav-portfolio']",
     featureRequired: "portfolioGallery",
     popover: {
       title: "Portfolio Gallery",
-      description: "Showcase your work with photos and before/after images. Upload project photos to build trust with potential customers.",
-      side: "bottom" as const,
-      align: "start" as const,
+      description: "The 'Portfolio' section lets you showcase your work with photos and before/after images. Upload project photos to build trust with potential customers.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {
     id: "menu",
-    element: "[data-tour='nav-menu']",
     featureRequired: "menuSystem",
     popover: {
       title: "Menu Builder",
-      description: "Create and manage your menu with categories and items. Perfect for restaurants, cafes, and food service businesses.",
-      side: "bottom" as const,
-      align: "start" as const,
+      description: "The 'Menu' section lets you create and manage your menu with categories and items. Perfect for restaurants, cafes, and food service businesses.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {
     id: "booking",
-    element: "[data-tour='nav-booking']",
     featureRequired: "bookingSystem",
     popover: {
       title: "Booking System",
-      description: "Connect your Calendly or Cal.com account to enable online booking. Customers can schedule appointments directly from your site.",
-      side: "bottom" as const,
-      align: "start" as const,
+      description: "In 'Booking', you can connect your Calendly or Cal.com account to enable online booking. Customers can schedule appointments directly from your site.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {
     id: "inquiries",
-    element: "[data-tour='nav-inquiries']",
     popover: {
       title: "Customer Inquiries",
-      description: "View and respond to contact form submissions. Keep track of leads and customer questions.",
-      side: "bottom" as const,
-      align: "start" as const,
+      description: "The 'Inquiries' section shows contact form submissions. View and respond to leads and customer questions here.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {
     id: "faq",
-    element: "[data-tour='nav-faq']",
     popover: {
       title: "FAQ Management",
-      description: "Create and manage frequently asked questions. Help customers find answers without needing to contact you.",
-      side: "bottom" as const,
-      align: "start" as const,
+      description: "In the 'FAQ' section, create and manage frequently asked questions. Help customers find answers without needing to contact you.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {
     id: "settings",
-    element: "[data-tour='nav-settings']",
     popover: {
       title: "Business Settings",
-      description: "Customize your business type, appearance, contact info, and more. Configure which features are enabled for your specific business.",
-      side: "bottom" as const,
-      align: "start" as const,
+      description: "The 'Settings' section lets you customize your business type, appearance, contact info, and more. Configure which features are enabled for your specific business.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {
     id: "view-site",
-    element: "[data-tour='view-site']",
     popover: {
       title: "Preview Your Site",
-      description: "Click here anytime to see your live website. Check how your services appear to customers.",
-      side: "bottom" as const,
-      align: "end" as const,
+      description: "Click 'View Site' in the navigation bar anytime to see your live website and check how your services appear to customers.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {
     id: "tour-button",
-    element: "[data-tour='tour-button']",
     popover: {
       title: "Need Help? Take the Tour Again!",
-      description: "Click this button anytime to restart the guided tour.",
-      side: "bottom" as const,
-      align: "end" as const,
+      description: "Click the help button in the navigation bar anytime to restart this guided tour.",
+      side: "over" as const,
+      align: "center" as const,
     },
   },
   {

@@ -152,6 +152,17 @@ export function useTour(): UseTourReturn {
     const driverInstance = driver({
       ...tourDriverConfig,
       steps: filteredSteps,
+      onNextClick: () => {
+        // Check if this is the last step (Finish button clicked)
+        if (!driverInstance.hasNextStep()) {
+          setTourData(true);
+          setHasCompletedTour(true);
+          setIsTourActive(false);
+          driverInstance.destroy();
+        } else {
+          driverInstance.moveNext();
+        }
+      },
       onCloseClick: () => {
         // Mark tour as complete when user clicks X or outside
         setTourData(true);
