@@ -71,7 +71,7 @@ export function Header({ settings, storeName }: HeaderProps) {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            {settings.logoUrl ? (
+            {settings.logoUrl && !settings.useTextLogo ? (
               <Image
                 src={settings.logoUrl}
                 alt={storeName}
@@ -80,13 +80,16 @@ export function Header({ settings, storeName }: HeaderProps) {
                 className="transition-all duration-300"
               />
             ) : null}
-            <span
-              className={"font-bold transition-all duration-300 " + (
-                useScrolledStyle ? "text-lg text-gray-900" : "text-xl text-white"
-              )}
-            >
-              {storeName}
-            </span>
+            {/* Show business name if useTextLogo is true or if no logo URL */}
+            {(settings.useTextLogo || !settings.logoUrl) && (
+              <span
+                className={"font-bold transition-all duration-300 " + (
+                  useScrolledStyle ? "text-lg text-gray-900" : "text-xl text-white"
+                )}
+              >
+                {storeName}
+              </span>
+            )}
           </Link>
 
           {/* Desktop Navigation */}

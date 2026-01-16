@@ -153,6 +153,7 @@ export interface RuntimeSettings {
   darkModeEnabled: boolean;
   brandColor: string; // Admin-configurable brand color (hex)
   logoUrl: string;
+  useTextLogo: boolean; // If true, display business name instead of logo image
 
   // Content
   tagline: string;
@@ -278,6 +279,7 @@ function getDefaultSettings(): RuntimeSettings {
     darkModeEnabled: false,
     brandColor: config.primaryColor || "#FFD700",
     logoUrl: config.logoUrl || "",
+    useTextLogo: !config.logoUrl, // Default to text logo if no logo URL
     tagline: config.tagline || "",
     aboutText: config.aboutText || "",
 
@@ -465,6 +467,7 @@ export async function getStoreSettingsFromDB(): Promise<RuntimeSettings> {
         darkModeEnabled: s.darkModeEnabled ?? defaults.darkModeEnabled,
         brandColor: s.brandColor || defaults.brandColor,
         logoUrl: s.logoUrl || defaults.logoUrl,
+        useTextLogo: s.useTextLogo ?? defaults.useTextLogo,
         tagline: s.tagline ?? defaults.tagline,
         aboutText: s.aboutText ?? defaults.aboutText,
 

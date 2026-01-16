@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Save, Plus, X, GripVertical, Star, Lock, Check, Sparkles, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Save, Plus, X, GripVertical, Star, Lock, Check, Sparkles, ExternalLink, ChevronDown, ChevronUp, Upload, Loader2, Image as ImageIcon, Type } from "lucide-react";
 import { allThemes } from "@/lib/themes";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { BusinessTypeSelector } from "@/components/BusinessTypeSelector";
@@ -25,6 +25,10 @@ interface Settings {
   businessType: BusinessType;
   enabledFeatures: EnabledFeatures;
   featuresModified?: boolean;
+
+  // Logo & Branding
+  logoUrl?: string;
+  useTextLogo: boolean;
 
   // General
   tagline: string;
@@ -116,6 +120,8 @@ const defaultSettings: Settings = {
   businessType: "custom",
   enabledFeatures: getFeatureDefaults("custom"),
   featuresModified: false,
+  logoUrl: undefined,
+  useTextLogo: true,
   tagline: "",
   aboutText: "",
   businessHours: "Mon-Fri 9am-5pm",
@@ -216,6 +222,9 @@ export default function SettingsPage() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("general");
   const [newArea, setNewArea] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState("");
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     hero: true,
     sections: false,
@@ -285,6 +294,65 @@ export default function SettingsPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  // Logo upload handler
+  async function handleLogoUpload(file: File) {
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+    if (!allowedTypes.includes(file.type)) {
+      setLogoError("Please upload a JPG, PNG, WebP, or SVG image.");
+      return;
+    }
+
+    // Validate file size (2MB max for logos)
+    if (file.size > 2 * 1024 * 1024) {
+      setLogoError("Logo must be less than 2MB.");
+      return;
+    }
+
+    setUploadingLogo(true);
+    setLogoError("");
+
+    try {
+      const token = localStorage.getItem("admin_token");
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Upload failed");
+      }
+
+      const { url } = await res.json();
+      setSettings((prev) => ({ ...prev, logoUrl: url, useTextLogo: false }));
+    } catch (err) {
+      setLogoError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
+
+  function handleLogoFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleLogoUpload(file);
+    }
+    // Reset input
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
+  }
+
+  function handleRemoveLogo() {
+    setSettings((prev) => ({ ...prev, logoUrl: undefined, useTextLogo: true }));
+    setLogoError("");
   }
 
   function updateProcess(index: number, field: keyof ProcessStep, value: string | number) {
@@ -611,6 +679,145 @@ export default function SettingsPage() {
       {/* Appearance Tab */}
       {activeTab === "appearance" && (
         <div className="space-y-6">
+          {/* Logo & Branding Section */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-900">Logo & Branding</h3>
+              <p className="text-sm text-gray-500">Upload your business logo or use text-based branding</p>
+            </div>
+
+            {/* Logo Type Toggle */}
+            <div className="flex gap-4 mb-6">
+              <button
+                type="button"
+                onClick={() => setSettings((prev) => ({ ...prev, useTextLogo: false }))}
+                className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                  !settings.useTextLogo
+                    ? "border-brand bg-brand/5"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <ImageIcon className={`w-5 h-5 ${!settings.useTextLogo ? "text-brand" : "text-gray-400"}`} />
+                <span className={`font-medium ${!settings.useTextLogo ? "text-gray-900" : "text-gray-600"}`}>
+                  Image Logo
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettings((prev) => ({ ...prev, useTextLogo: true }))}
+                className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                  settings.useTextLogo
+                    ? "border-brand bg-brand/5"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <Type className={`w-5 h-5 ${settings.useTextLogo ? "text-brand" : "text-gray-400"}`} />
+                <span className={`font-medium ${settings.useTextLogo ? "text-gray-900" : "text-gray-600"}`}>
+                  Text Logo
+                </span>
+              </button>
+            </div>
+
+            {/* Image Logo Upload */}
+            {!settings.useTextLogo && (
+              <div>
+                {settings.logoUrl ? (
+                  <div className="flex items-center gap-6">
+                    {/* Logo Preview */}
+                    <div className="w-32 h-32 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={settings.logoUrl}
+                        alt="Logo preview"
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 mb-3">
+                        Current logo uploaded. Click below to change or remove it.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => logoInputRef.current?.click()}
+                          disabled={uploadingLogo}
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                          {uploadingLogo ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4" />
+                          )}
+                          Change Logo
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveLogo}
+                          className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => logoInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+                      uploadingLogo
+                        ? "border-brand bg-brand/5 pointer-events-none"
+                        : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                    }`}
+                  >
+                    {uploadingLogo ? (
+                      <div className="flex flex-col items-center">
+                        <Loader2 className="w-8 h-8 text-brand animate-spin mb-2" />
+                        <p className="text-sm text-gray-500">Uploading...</p>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-10 h-10 mx-auto text-gray-400 mb-3" />
+                        <p className="text-sm text-gray-600 font-medium">
+                          Click to upload your logo
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          PNG, JPG, WebP, or SVG (max 2MB)
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          Recommended: 200x200px or larger, square or horizontal
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Hidden File Input */}
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                  onChange={handleLogoFileSelect}
+                  className="hidden"
+                />
+
+                {/* Error Message */}
+                {logoError && <p className="text-red-500 text-sm mt-3">{logoError}</p>}
+              </div>
+            )}
+
+            {/* Text Logo Info */}
+            {settings.useTextLogo && (
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">
+                  Your business name will be displayed as the logo in your site header.
+                  You can change your business name in the General tab.
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Theme Selection Grid */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-6">
