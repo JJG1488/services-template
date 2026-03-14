@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "services": "الخدمات",
+    "about": "من نحن",
+    "contact": "اتصل بنا",
+    "portfolio": "معرض الأعمال",
+    "toggleMenu": "تبديل القائمة"
+  },
+  "hero": {
+    "bookNow": "احجز الآن",
+    "learnMore": "اعرف المزيد"
+  },
+  "home": {
+    "ourServices": "خدماتنا",
+    "viewAll": "عرض جميع الخدمات",
+    "testimonials": "ماذا يقول عملاؤنا",
+    "getInTouch": "تواصل معنا"
+  },
+  "about": {
+    "heading": "من نحن",
+    "ourStory": "قصتنا"
+  },
+  "services": {
+    "heading": "خدماتنا",
+    "bookNow": "احجز الآن",
+    "requestQuote": "اطلب عرض سعر",
+    "startingAt": "يبدأ من",
+    "noServices": "لا توجد خدمات متاحة.",
+    "details": "التفاصيل",
+    "duration": "المدة",
+    "price": "السعر"
+  },
+  "booking": {
+    "heading": "حجز موعد",
+    "selectService": "اختر خدمة",
+    "selectDate": "اختر تاريخاً",
+    "selectTime": "اختر وقتاً",
+    "yourInfo": "معلوماتك",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "notes": "ملاحظات (اختياري)",
+    "confirmBooking": "تأكيد الحجز",
+    "processing": "جارٍ المعالجة...",
+    "confirmed": "تم تأكيد الحجز!",
+    "confirmationMessage": "سنرسل لك بريداً إلكترونياً بتفاصيل حجزك.",
+    "bookAnother": "حجز موعد آخر"
+  },
+  "contact": {
+    "heading": "اتصل بنا",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "message": "الرسالة",
+    "send": "إرسال الرسالة",
+    "sending": "جارٍ الإرسال...",
+    "sent": "تم إرسال الرسالة!",
+    "sentMessage": "سنتواصل معك قريباً.",
+    "sendAnother": "إرسال رسالة أخرى",
+    "errorSending": "فشل إرسال الرسالة"
+  },
+  "portfolio": {
+    "heading": "أعمالنا",
+    "viewProject": "عرض المشروع",
+    "noProjects": "لا توجد مشاريع لعرضها حالياً."
+  },
+  "faq": {
+    "heading": "الأسئلة الشائعة",
+    "noQuestions": "لا توجد أسئلة بعد."
+  },
+  "footer": {
+    "quickLinks": "روابط سريعة",
+    "services": "الخدمات",
+    "about": "من نحن",
+    "contact": "اتصل بنا",
+    "allRightsReserved": "جميع الحقوق محفوظة."
+  },
+  "admin": {
+    "dashboard": "لوحة التحكم",
+    "services": "الخدمات",
+    "bookings": "الحجوزات",
+    "portfolio": "معرض الأعمال",
+    "settings": "الإعدادات",
+    "viewSite": "عرض الموقع"
+  }
+}

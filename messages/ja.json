@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "services": "サービス",
+    "about": "私たちについて",
+    "contact": "お問い合わせ",
+    "portfolio": "ポートフォリオ",
+    "toggleMenu": "メニューを切り替え"
+  },
+  "hero": {
+    "bookNow": "今すぐ予約",
+    "learnMore": "詳しく見る"
+  },
+  "home": {
+    "ourServices": "サービス一覧",
+    "viewAll": "すべてのサービスを見る",
+    "testimonials": "お客様の声",
+    "getInTouch": "お問い合わせ"
+  },
+  "about": {
+    "heading": "私たちについて",
+    "ourStory": "私たちの物語"
+  },
+  "services": {
+    "heading": "サービス一覧",
+    "bookNow": "今すぐ予約",
+    "requestQuote": "見積もりを依頼",
+    "startingAt": "料金",
+    "noServices": "現在ご利用いただけるサービスはありません。",
+    "details": "詳細",
+    "duration": "所要時間",
+    "price": "料金"
+  },
+  "booking": {
+    "heading": "予約する",
+    "selectService": "サービスを選択",
+    "selectDate": "日付を選択",
+    "selectTime": "時間を選択",
+    "yourInfo": "お客様情報",
+    "name": "お名前",
+    "email": "メールアドレス",
+    "phone": "電話番号",
+    "notes": "備考（任意）",
+    "confirmBooking": "予約を確定",
+    "processing": "処理中...",
+    "confirmed": "予約が確定しました！",
+    "confirmationMessage": "予約内容の確認メールをお送りいたします。",
+    "bookAnother": "別の予約をする"
+  },
+  "contact": {
+    "heading": "お問い合わせ",
+    "name": "お名前",
+    "email": "メールアドレス",
+    "message": "メッセージ",
+    "send": "メッセージを送信",
+    "sending": "送信中...",
+    "sent": "送信完了！",
+    "sentMessage": "折り返しご連絡いたします。",
+    "sendAnother": "別のメッセージを送信",
+    "errorSending": "メッセージの送信に失敗しました"
+  },
+  "portfolio": {
+    "heading": "実績紹介",
+    "viewProject": "プロジェクトを見る",
+    "noProjects": "まだプロジェクトはありません。"
+  },
+  "faq": {
+    "heading": "よくあるご質問",
+    "noQuestions": "まだ質問はありません。"
+  },
+  "footer": {
+    "quickLinks": "クイックリンク",
+    "services": "サービス",
+    "about": "私たちについて",
+    "contact": "お問い合わせ",
+    "allRightsReserved": "All rights reserved."
+  },
+  "admin": {
+    "dashboard": "ダッシュボード",
+    "services": "サービス",
+    "bookings": "予約管理",
+    "portfolio": "ポートフォリオ",
+    "settings": "設定",
+    "viewSite": "サイトを表示"
+  }
+}

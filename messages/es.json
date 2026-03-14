@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "services": "Servicios",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "portfolio": "Portafolio",
+    "toggleMenu": "Alternar menú"
+  },
+  "hero": {
+    "bookNow": "Reservar Ahora",
+    "learnMore": "Más Información"
+  },
+  "home": {
+    "ourServices": "Nuestros Servicios",
+    "viewAll": "Ver Todos los Servicios",
+    "testimonials": "Lo Que Dicen Nuestros Clientes",
+    "getInTouch": "Contáctenos"
+  },
+  "about": {
+    "heading": "Sobre Nosotros",
+    "ourStory": "Nuestra Historia"
+  },
+  "services": {
+    "heading": "Nuestros Servicios",
+    "bookNow": "Reservar Ahora",
+    "requestQuote": "Solicitar Presupuesto",
+    "startingAt": "Desde",
+    "noServices": "No hay servicios disponibles.",
+    "details": "Detalles",
+    "duration": "Duración",
+    "price": "Precio"
+  },
+  "booking": {
+    "heading": "Reservar una Cita",
+    "selectService": "Seleccione un servicio",
+    "selectDate": "Seleccione una fecha",
+    "selectTime": "Seleccione una hora",
+    "yourInfo": "Su Información",
+    "name": "Nombre",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "notes": "Notas (opcional)",
+    "confirmBooking": "Confirmar Reserva",
+    "processing": "Procesando...",
+    "confirmed": "¡Reserva Confirmada!",
+    "confirmationMessage": "Le enviaremos un correo de confirmación con los detalles de su reserva.",
+    "bookAnother": "Reservar Otra Cita"
+  },
+  "contact": {
+    "heading": "Contáctenos",
+    "name": "Nombre",
+    "email": "Correo Electrónico",
+    "message": "Mensaje",
+    "send": "Enviar Mensaje",
+    "sending": "Enviando...",
+    "sent": "¡Mensaje Enviado!",
+    "sentMessage": "Nos pondremos en contacto con usted pronto.",
+    "sendAnother": "Enviar Otro Mensaje",
+    "errorSending": "Error al enviar el mensaje"
+  },
+  "portfolio": {
+    "heading": "Nuestro Trabajo",
+    "viewProject": "Ver Proyecto",
+    "noProjects": "Aún no hay proyectos para mostrar."
+  },
+  "faq": {
+    "heading": "Preguntas Frecuentes",
+    "noQuestions": "Aún no hay preguntas."
+  },
+  "footer": {
+    "quickLinks": "Enlaces Rápidos",
+    "services": "Servicios",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "allRightsReserved": "Todos los derechos reservados."
+  },
+  "admin": {
+    "dashboard": "Panel de Control",
+    "services": "Servicios",
+    "bookings": "Reservas",
+    "portfolio": "Portafolio",
+    "settings": "Configuración",
+    "viewSite": "Ver Sitio"
+  }
+}

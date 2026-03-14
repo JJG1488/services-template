@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "services": "Leistungen",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "portfolio": "Portfolio",
+    "toggleMenu": "Menü umschalten"
+  },
+  "hero": {
+    "bookNow": "Jetzt Buchen",
+    "learnMore": "Mehr Erfahren"
+  },
+  "home": {
+    "ourServices": "Unsere Leistungen",
+    "viewAll": "Alle Leistungen Anzeigen",
+    "testimonials": "Was Unsere Kunden Sagen",
+    "getInTouch": "Kontaktieren Sie Uns"
+  },
+  "about": {
+    "heading": "Über Uns",
+    "ourStory": "Unsere Geschichte"
+  },
+  "services": {
+    "heading": "Unsere Leistungen",
+    "bookNow": "Jetzt Buchen",
+    "requestQuote": "Angebot Anfordern",
+    "startingAt": "Ab",
+    "noServices": "Keine Leistungen verfügbar.",
+    "details": "Details",
+    "duration": "Dauer",
+    "price": "Preis"
+  },
+  "booking": {
+    "heading": "Termin Vereinbaren",
+    "selectService": "Wählen Sie eine Leistung",
+    "selectDate": "Wählen Sie ein Datum",
+    "selectTime": "Wählen Sie eine Uhrzeit",
+    "yourInfo": "Ihre Angaben",
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "notes": "Anmerkungen (optional)",
+    "confirmBooking": "Buchung Bestätigen",
+    "processing": "Wird verarbeitet...",
+    "confirmed": "Buchung Bestätigt!",
+    "confirmationMessage": "Wir senden Ihnen eine Bestätigungs-E-Mail mit Ihren Buchungsdetails.",
+    "bookAnother": "Weiteren Termin Vereinbaren"
+  },
+  "contact": {
+    "heading": "Kontaktieren Sie Uns",
+    "name": "Name",
+    "email": "E-Mail",
+    "message": "Nachricht",
+    "send": "Nachricht Senden",
+    "sending": "Wird gesendet...",
+    "sent": "Nachricht Gesendet!",
+    "sentMessage": "Wir melden uns in Kürze bei Ihnen.",
+    "sendAnother": "Weitere Nachricht Senden",
+    "errorSending": "Nachricht konnte nicht gesendet werden"
+  },
+  "portfolio": {
+    "heading": "Unsere Arbeiten",
+    "viewProject": "Projekt Ansehen",
+    "noProjects": "Noch keine Projekte vorhanden."
+  },
+  "faq": {
+    "heading": "Häufig Gestellte Fragen",
+    "noQuestions": "Noch keine Fragen vorhanden."
+  },
+  "footer": {
+    "quickLinks": "Schnellzugriff",
+    "services": "Leistungen",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "allRightsReserved": "Alle Rechte vorbehalten."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "services": "Leistungen",
+    "bookings": "Buchungen",
+    "portfolio": "Portfolio",
+    "settings": "Einstellungen",
+    "viewSite": "Seite Ansehen"
+  }
+}

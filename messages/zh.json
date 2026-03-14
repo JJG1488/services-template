@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "services": "服务",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "portfolio": "作品集",
+    "toggleMenu": "切换菜单"
+  },
+  "hero": {
+    "bookNow": "立即预约",
+    "learnMore": "了解更多"
+  },
+  "home": {
+    "ourServices": "我们的服务",
+    "viewAll": "查看全部服务",
+    "testimonials": "客户评价",
+    "getInTouch": "联系我们"
+  },
+  "about": {
+    "heading": "关于我们",
+    "ourStory": "我们的故事"
+  },
+  "services": {
+    "heading": "我们的服务",
+    "bookNow": "立即预约",
+    "requestQuote": "获取报价",
+    "startingAt": "起价",
+    "noServices": "暂无可用服务。",
+    "details": "详情",
+    "duration": "时长",
+    "price": "价格"
+  },
+  "booking": {
+    "heading": "预约服务",
+    "selectService": "选择服务",
+    "selectDate": "选择日期",
+    "selectTime": "选择时间",
+    "yourInfo": "您的信息",
+    "name": "姓名",
+    "email": "电子邮箱",
+    "phone": "电话",
+    "notes": "备注（选填）",
+    "confirmBooking": "确认预约",
+    "processing": "处理中...",
+    "confirmed": "预约成功！",
+    "confirmationMessage": "我们将发送确认邮件，包含您的预约详情。",
+    "bookAnother": "再次预约"
+  },
+  "contact": {
+    "heading": "联系我们",
+    "name": "姓名",
+    "email": "电子邮箱",
+    "message": "留言",
+    "send": "发送消息",
+    "sending": "发送中...",
+    "sent": "发送成功！",
+    "sentMessage": "我们会尽快回复您。",
+    "sendAnother": "发送其他消息",
+    "errorSending": "消息发送失败"
+  },
+  "portfolio": {
+    "heading": "我们的作品",
+    "viewProject": "查看项目",
+    "noProjects": "暂无项目展示。"
+  },
+  "faq": {
+    "heading": "常见问题",
+    "noQuestions": "暂无问题。"
+  },
+  "footer": {
+    "quickLinks": "快速链接",
+    "services": "服务",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "allRightsReserved": "版权所有。"
+  },
+  "admin": {
+    "dashboard": "控制台",
+    "services": "服务",
+    "bookings": "预约管理",
+    "portfolio": "作品集",
+    "settings": "设置",
+    "viewSite": "查看网站"
+  }
+}

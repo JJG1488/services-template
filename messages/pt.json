@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "services": "Serviços",
+    "about": "Sobre",
+    "contact": "Contato",
+    "portfolio": "Portfólio",
+    "toggleMenu": "Alternar menu"
+  },
+  "hero": {
+    "bookNow": "Agendar Agora",
+    "learnMore": "Saiba Mais"
+  },
+  "home": {
+    "ourServices": "Nossos Serviços",
+    "viewAll": "Ver Todos os Serviços",
+    "testimonials": "O Que Nossos Clientes Dizem",
+    "getInTouch": "Entre em Contato"
+  },
+  "about": {
+    "heading": "Sobre Nós",
+    "ourStory": "Nossa História"
+  },
+  "services": {
+    "heading": "Nossos Serviços",
+    "bookNow": "Agendar Agora",
+    "requestQuote": "Solicitar Orçamento",
+    "startingAt": "A partir de",
+    "noServices": "Nenhum serviço disponível.",
+    "details": "Detalhes",
+    "duration": "Duração",
+    "price": "Preço"
+  },
+  "booking": {
+    "heading": "Agendar um Horário",
+    "selectService": "Selecione um serviço",
+    "selectDate": "Selecione uma data",
+    "selectTime": "Selecione um horário",
+    "yourInfo": "Suas Informações",
+    "name": "Nome",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "notes": "Observações (opcional)",
+    "confirmBooking": "Confirmar Agendamento",
+    "processing": "Processando...",
+    "confirmed": "Agendamento Confirmado!",
+    "confirmationMessage": "Enviaremos um e-mail de confirmação com os detalhes do seu agendamento.",
+    "bookAnother": "Agendar Outro Horário"
+  },
+  "contact": {
+    "heading": "Fale Conosco",
+    "name": "Nome",
+    "email": "E-mail",
+    "message": "Mensagem",
+    "send": "Enviar Mensagem",
+    "sending": "Enviando...",
+    "sent": "Mensagem Enviada!",
+    "sentMessage": "Retornaremos em breve.",
+    "sendAnother": "Enviar Outra Mensagem",
+    "errorSending": "Falha ao enviar a mensagem"
+  },
+  "portfolio": {
+    "heading": "Nosso Trabalho",
+    "viewProject": "Ver Projeto",
+    "noProjects": "Nenhum projeto para exibir ainda."
+  },
+  "faq": {
+    "heading": "Perguntas Frequentes",
+    "noQuestions": "Nenhuma pergunta ainda."
+  },
+  "footer": {
+    "quickLinks": "Links Rápidos",
+    "services": "Serviços",
+    "about": "Sobre",
+    "contact": "Contato",
+    "allRightsReserved": "Todos os direitos reservados."
+  },
+  "admin": {
+    "dashboard": "Painel de Controle",
+    "services": "Serviços",
+    "bookings": "Agendamentos",
+    "portfolio": "Portfólio",
+    "settings": "Configurações",
+    "viewSite": "Ver Site"
+  }
+}

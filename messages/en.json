@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "portfolio": "Portfolio",
+    "toggleMenu": "Toggle menu"
+  },
+  "hero": {
+    "bookNow": "Book Now",
+    "learnMore": "Learn More"
+  },
+  "home": {
+    "ourServices": "Our Services",
+    "viewAll": "View All Services",
+    "testimonials": "What Our Clients Say",
+    "getInTouch": "Get in Touch"
+  },
+  "about": {
+    "heading": "About Us",
+    "ourStory": "Our Story"
+  },
+  "services": {
+    "heading": "Our Services",
+    "bookNow": "Book Now",
+    "requestQuote": "Request a Quote",
+    "startingAt": "Starting at",
+    "noServices": "No services available.",
+    "details": "Details",
+    "duration": "Duration",
+    "price": "Price"
+  },
+  "booking": {
+    "heading": "Book an Appointment",
+    "selectService": "Select a service",
+    "selectDate": "Select a date",
+    "selectTime": "Select a time",
+    "yourInfo": "Your Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "notes": "Notes (optional)",
+    "confirmBooking": "Confirm Booking",
+    "processing": "Processing...",
+    "confirmed": "Booking Confirmed!",
+    "confirmationMessage": "We'll send a confirmation email with your booking details.",
+    "bookAnother": "Book Another Appointment"
+  },
+  "contact": {
+    "heading": "Contact Us",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "sent": "Message Sent!",
+    "sentMessage": "We'll get back to you shortly.",
+    "sendAnother": "Send Another Message",
+    "errorSending": "Failed to send message"
+  },
+  "portfolio": {
+    "heading": "Our Work",
+    "viewProject": "View Project",
+    "noProjects": "No projects to show yet."
+  },
+  "faq": {
+    "heading": "Frequently Asked Questions",
+    "noQuestions": "No questions yet."
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "allRightsReserved": "All rights reserved."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "services": "Services",
+    "bookings": "Bookings",
+    "portfolio": "Portfolio",
+    "settings": "Settings",
+    "viewSite": "View Site"
+  }
+}

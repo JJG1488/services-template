@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "services": "Services",
+    "about": "À propos",
+    "contact": "Contact",
+    "portfolio": "Portfolio",
+    "toggleMenu": "Basculer le menu"
+  },
+  "hero": {
+    "bookNow": "Réserver Maintenant",
+    "learnMore": "En Savoir Plus"
+  },
+  "home": {
+    "ourServices": "Nos Services",
+    "viewAll": "Voir Tous les Services",
+    "testimonials": "Ce Que Disent Nos Clients",
+    "getInTouch": "Nous Contacter"
+  },
+  "about": {
+    "heading": "À Propos de Nous",
+    "ourStory": "Notre Histoire"
+  },
+  "services": {
+    "heading": "Nos Services",
+    "bookNow": "Réserver Maintenant",
+    "requestQuote": "Demander un Devis",
+    "startingAt": "À partir de",
+    "noServices": "Aucun service disponible.",
+    "details": "Détails",
+    "duration": "Durée",
+    "price": "Prix"
+  },
+  "booking": {
+    "heading": "Prendre Rendez-vous",
+    "selectService": "Sélectionnez un service",
+    "selectDate": "Sélectionnez une date",
+    "selectTime": "Sélectionnez une heure",
+    "yourInfo": "Vos Informations",
+    "name": "Nom",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "notes": "Notes (facultatif)",
+    "confirmBooking": "Confirmer la Réservation",
+    "processing": "Traitement en cours...",
+    "confirmed": "Réservation Confirmée !",
+    "confirmationMessage": "Nous vous enverrons un e-mail de confirmation avec les détails de votre réservation.",
+    "bookAnother": "Prendre un Autre Rendez-vous"
+  },
+  "contact": {
+    "heading": "Nous Contacter",
+    "name": "Nom",
+    "email": "E-mail",
+    "message": "Message",
+    "send": "Envoyer le Message",
+    "sending": "Envoi en cours...",
+    "sent": "Message Envoyé !",
+    "sentMessage": "Nous vous répondrons dans les plus brefs délais.",
+    "sendAnother": "Envoyer un Autre Message",
+    "errorSending": "Échec de l'envoi du message"
+  },
+  "portfolio": {
+    "heading": "Nos Réalisations",
+    "viewProject": "Voir le Projet",
+    "noProjects": "Aucun projet à afficher pour le moment."
+  },
+  "faq": {
+    "heading": "Questions Fréquentes",
+    "noQuestions": "Aucune question pour le moment."
+  },
+  "footer": {
+    "quickLinks": "Liens Rapides",
+    "services": "Services",
+    "about": "À propos",
+    "contact": "Contact",
+    "allRightsReserved": "Tous droits réservés."
+  },
+  "admin": {
+    "dashboard": "Tableau de Bord",
+    "services": "Services",
+    "bookings": "Réservations",
+    "portfolio": "Portfolio",
+    "settings": "Paramètres",
+    "viewSite": "Voir le Site"
+  }
+}
